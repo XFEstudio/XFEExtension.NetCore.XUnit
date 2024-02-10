@@ -15,10 +15,16 @@
     <RepositoryUrl>https://github.com/XFEstudio/XFEExtension.NetCore.XUnit</RepositoryUrl>
     <PackageTags>Test;XUnit;XFE;Unit</PackageTags>
     <Version>1.0.2</Version>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
   </PropertyGroup>
 
   <ItemGroup>
     <!-- Package the generator in the analyzer directory of the nuget package -->
+    <None Include="..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
     <None Include="..\logoIcon.png">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
