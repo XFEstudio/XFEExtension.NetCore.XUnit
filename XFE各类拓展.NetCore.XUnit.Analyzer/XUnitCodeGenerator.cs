@@ -11,14 +11,10 @@ namespace XFE各类拓展.NetCore.XUnit
 
         public void Execute(GeneratorExecutionContext context)
         {
-            // find the main method
-            var mainMethod = context.Compilation.GetEntryPoint(context.CancellationToken);
-
-            // build up the source code
             string source = $@"
 using XFE各类拓展.NetCore.XUnit;
 
-namespace {mainMethod.ContainingNamespace.Name}
+namespace XFE各类拓展.NetCore.XUnit
 {{
     public static class XUnitCode
     {{
@@ -29,8 +25,6 @@ namespace {mainMethod.ContainingNamespace.Name}
     }}
 }}
 ";
-            //var typeName = mainMethod.ContainingType.Name;
-            // add the source code to the compilation
             context.AddSource($"XUnitCode.g.cs", source);
         }
     }
