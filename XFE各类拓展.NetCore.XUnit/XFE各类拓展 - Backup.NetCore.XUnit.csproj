@@ -13,7 +13,7 @@
     <PackageIcon>logoIcon.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/XFEstudio/XFEExtension.NetCore.XUnit</RepositoryUrl>
-    <PackageTags>XFE;Test;XUnit;Unit</PackageTags>
+    <PackageTags>Test;XUnit;XFE;Unit</PackageTags>
     <Version>1.0.4</Version>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
