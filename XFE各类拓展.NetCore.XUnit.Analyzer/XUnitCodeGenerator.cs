@@ -11,15 +11,11 @@ namespace XFE各类拓展.NetCore.XUnit
 
         public void Execute(GeneratorExecutionContext context)
         {
-            string source = $@"
-namespace XFE各类拓展.NetCore.XUnit
+            string source = $@"namespace XFE各类拓展.NetCore.XUnit
 {{
     public static class XUnitCode
     {{
-        public async static Task Main(string[] args)
-        {{
-            await XFECode.RunTest();
-        }}
+        public async static Task Main(string[] args) => await XFECode.RunTest();
     }}
 }}
 ";
