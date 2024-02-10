@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <PackageReleaseNotes>XUnit测试框架</PackageReleaseNotes>
+    <Title>XUnit</Title>
+    <Authors>XFEstudio</Authors>
+    <Company>寰宇朽力网络科技有限公司</Company>
+    <Description>提供方便快捷的测试，无需编写Main方法，可直接添加特性在类或方法上进行测试</Description>
+    <Copyright>寰宇朽力网络科技有限公司版权所有</Copyright>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Package the generator in the analyzer directory of the nuget package -->
+    <None Include="C:\Users\XFEstudio\Desktop\work\C#\OtherProject\CodeAnalyzerTest\CodeAnalyzerTest.Anaylyzer\bin\Debug\netstandard2.0\CodeAnalyzerTest.Anaylyzer.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="XFE各类拓展.NetCore" Version="1.5.0" />
+  </ItemGroup>
+
+</Project>

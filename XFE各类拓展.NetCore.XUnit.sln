@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34525.116
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XFE各类拓展.NetCore.XUnit", "XFE各类拓展.NetCore.XUnit\XFE各类拓展.NetCore.XUnit.csproj", "{024C8A43-C965-48EC-A6B8-A06765698D4D}"
+	ProjectSection(ProjectDependencies) = postProject
+		{4E353122-756D-4DBF-A97B-F364DDB2BF5F} = {4E353122-756D-4DBF-A97B-F364DDB2BF5F}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XFE各类拓展.NetCore.XUnit.Analyzer", "XFE各类拓展.NetCore.XUnit.Analyzer\XFE各类拓展.NetCore.XUnit.Analyzer.csproj", "{4E353122-756D-4DBF-A97B-F364DDB2BF5F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{024C8A43-C965-48EC-A6B8-A06765698D4D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{024C8A43-C965-48EC-A6B8-A06765698D4D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{024C8A43-C965-48EC-A6B8-A06765698D4D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{024C8A43-C965-48EC-A6B8-A06765698D4D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4E353122-756D-4DBF-A97B-F364DDB2BF5F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4E353122-756D-4DBF-A97B-F364DDB2BF5F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4E353122-756D-4DBF-A97B-F364DDB2BF5F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4E353122-756D-4DBF-A97B-F364DDB2BF5F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F064F711-9DBD-46B1-AC1E-43E853A6B916}
+	EndGlobalSection
+EndGlobal
