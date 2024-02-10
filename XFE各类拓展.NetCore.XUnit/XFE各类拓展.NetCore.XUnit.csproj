@@ -9,11 +9,24 @@
     <Company>寰宇朽力网络科技有限公司</Company>
     <Description>提供方便快捷的测试，无需编写Main方法，可直接添加特性在类或方法上进行测试</Description>
     <Copyright>寰宇朽力网络科技有限公司版权所有</Copyright>
+    <PackageProjectUrl>https://github.com/XFEstudio/XFEExtension.NetCore.XUnit</PackageProjectUrl>
+    <PackageIcon>logoIcon.png</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/XFEstudio/XFEExtension.NetCore.XUnit</RepositoryUrl>
+    <PackageTags>Test;XUnit;XFE;Unit</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
     <!-- Package the generator in the analyzer directory of the nuget package -->
-    <None Include="C:\Users\XFEstudio\Desktop\work\C#\OtherProject\CodeAnalyzerTest\CodeAnalyzerTest.Anaylyzer\bin\Debug\netstandard2.0\CodeAnalyzerTest.Anaylyzer.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+    <None Include="..\logoIcon.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="C:\Users\XFEstudio\Desktop\work\C#\GitHub\XFEstudio\XFE各类拓展.NetCore.XUnit\XFE各类拓展.NetCore.XUnit.Analyzer\bin\Release\netstandard2.0\XFE各类拓展.NetCore.XUnit.Analyzer.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
   </ItemGroup>
 
   <ItemGroup>
