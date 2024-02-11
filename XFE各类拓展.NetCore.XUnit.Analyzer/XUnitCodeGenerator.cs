@@ -11,7 +11,9 @@ namespace XFE各类拓展.NetCore.XUnit
 
         public void Execute(GeneratorExecutionContext context)
         {
-            string source = $@"namespace XFE各类拓展.NetCore.XUnit
+            string source = $@"global using XFE各类拓展.NetCore.XUnit;
+
+namespace XFE各类拓展.NetCore.XUnit
 {{
     public static class XUnitCode
     {{
