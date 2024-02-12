@@ -16,14 +16,14 @@ using XFE各类拓展.NetCore.XUnit;
 //可添加多个测试用例
 public class TestClass
 {
-	[MTest]
-	//[MTest]
-	//[MTest]
-	//可添加多个测试用例
-	public void TestMethod()
-	{
-		Console.WriteLine("Hello World!");
-	}
+    [MTest]
+    //[MTest]
+    //[MTest]
+    //可添加多个测试用例
+    public void TestMethod()
+    {
+        Console.WriteLine("Hello World!");
+    }
 }
 ```
 
@@ -37,13 +37,13 @@ using XFE各类拓展.NetCore.XUnit;
 [CTest]
 public class TestClass
 {
-	[MTest(1, 2)]
-	[MTest(2, 3)]
-	[MTest(3, 4)]
-	public void TestMethod(int a, int b)
-	{
-		Console.WriteLine(a + b);
-	}
+    [MTest(1, 2)]
+    [MTest(2, 3)]
+    [MTest(3, 4)]
+    public void TestMethod(int a, int b)
+    {
+        Console.WriteLine(a + b);
+    }
 }
 ```
 
@@ -57,12 +57,12 @@ using XFE各类拓展.NetCore.XUnit;
 [CTest]
 public class TestClass : XFECode
 {
-	[MTest(1, 2)]
-	[MTest(2, 3)]
-	public void TestMethod(int a, int b)
-	{
-		Assert(a + b == 3, "不等于3");
-	}
+    [MTest(1, 2)]
+    [MTest(2, 3)]
+    public void TestMethod(int a, int b)
+    {
+        Assert(a + b == 3, "不等于3");
+    }
 }
 ```
 
@@ -76,12 +76,12 @@ using XFE各类拓展.NetCore.XUnit;
 [CTest]
 public class TestClass
 {
-	[MTest(1, 2)]
-	[MTest(3, 4)]
-	public void TestMethod(int a, int b)
-	{
-		XFECode.Assert(a + b == 3, "不等于3");
-	}
+    [MTest(1, 2)]
+    [MTest(2, 3)]
+    public void TestMethod(int a, int b)
+    {
+        XFECode.Assert(a + b == 3, "不等于3");
+    }
 }
 ```
 
@@ -95,13 +95,13 @@ using XFE各类拓展.NetCore.XUnit;
 [CTest]
 public class TestClass
 {
-	[MRTest(1, 2, 3)]
-	[MRTest(2, 3, 5)]
-	[MRTest(3, 4, 7)]
-	public int TestMethod(int a, int b)
-	{
-		return a + b;
-	}
+    [MRTest(1, 2, 3)]
+    [MRTest(2, 3, 5)]
+    [MRTest(3, 4, 7)]
+    public int TestMethod(int a, int b)
+    {
+        return a + b;
+    }
 }
 ```
 
@@ -115,11 +115,11 @@ using XFE各类拓展.NetCore.XUnit;
 [CTest("这是一个测试类")]
 public class TestClass
 {
-	[MNTest("这是一个测试方法")]
-	public void TestMethod()
-	{
-		Console.WriteLine("Hello World!");
-	}
+    [MNTest("这是一个测试方法")]
+    public void TestMethod()
+    {
+        Console.WriteLine("Hello World!");
+    }
 }
 ```
 
@@ -133,11 +133,11 @@ using XFE各类拓展.NetCore.XUnit;
 [CTest("这是一个测试类")]
 public class TestClass
 {
-	[MNRTest("这是一个测试方法", 1, 2, 3)]
-	public int TestMethod(int a, int b)
-	{
-		return a + b;
-	}
+    [MNRTest("这是一个测试方法", 1, 2, 3)]
+    public int TestMethod(int a, int b)
+    {
+        return a + b;
+    }
 }
 ```
 
@@ -151,18 +151,18 @@ using XFE各类拓展.NetCore.XUnit;
 [CTest]
 public class TestClass
 {
-	string initWord;
-	[SetUp]
-	public void SetUp()
-	{
-		initWord = "Hello World!";
-	}
+    string initWord;
+    [SetUp]
+    public void SetUp()
+    {
+        initWord = "Hello World!";
+    }
 
-	[MTest]
-	public void TestMethod()
-	{
-		Console.WriteLine(initWord);
-	}
+    [MTest]
+    public void TestMethod()
+    {
+        Console.WriteLine(initWord);
+    }
 }
 ```
 
@@ -175,10 +175,10 @@ using XFE各类拓展.NetCore.XUnit;
 
 public class TestClass
 {
-	[SMTest]
-	public static void TestMethod()
-	{
-		Console.WriteLine("Hello World!");
-	}
+    [SMTest]
+    public static void TestMethod()
+    {
+        Console.WriteLine("Hello World!");
+    }
 }
 ```
