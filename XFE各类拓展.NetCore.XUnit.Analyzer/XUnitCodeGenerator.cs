@@ -7,11 +7,11 @@ namespace XFE各类拓展.NetCore.XUnit
     {
         public void Initialize(GeneratorInitializationContext context)
         {
-        }
-
-        public void Execute(GeneratorExecutionContext context)
-        {
-            string source = $@"namespace XFE各类拓展.NetCore.XUnit
+            context.RegisterForPostInitialization(init =>
+            {
+                string globalUsingCode = @"global using XFE各类拓展.NetCore.XUnit;";
+                init.AddSource("GlobalUsing.g.cs", globalUsingCode);
+                string xUnitCode = $@"namespace XFE各类拓展.NetCore.XUnit
 {{
     public static class XUnitCode
     {{
@@ -19,7 +19,10 @@ namespace XFE各类拓展.NetCore.XUnit
     }}
 }}
 ";
-            context.AddSource($"XUnitCode.g.cs", source);
+                init.AddSource($"XUnitCode.g.cs", xUnitCode);
+            });
         }
+
+        public void Execute(GeneratorExecutionContext context) { }
     }
 }
