@@ -9,8 +9,6 @@ XUnit测试框架，使得用户不需要编写Main函数，只需要在需要�
 ### 快速编写无参测试用例（CTest和MTest）
 
 ```csharp
-using XFE各类拓展.NetCore.XUnit;
-
 [CTest]
 //[CTest]
 //可添加多个测试用例
@@ -32,8 +30,6 @@ public class TestClass
 ### 带参数的测试用例
 
 ```csharp
-using XFE各类拓展.NetCore.XUnit;
-
 [CTest]
 public class TestClass
 {
@@ -52,8 +48,6 @@ public class TestClass
 ### 使用断言（通过继承类）
 
 ```csharp
-using XFE各类拓展.NetCore.XUnit;
-
 [CTest]
 public class TestClass : XFECode
 {
@@ -71,8 +65,6 @@ public class TestClass : XFECode
 ### 使用断言（不继承）
 
 ```csharp
-using XFE各类拓展.NetCore.XUnit;
-
 [CTest]
 public class TestClass
 {
@@ -90,8 +82,6 @@ public class TestClass
 ### 判断返回值是否相等（MRTest）
 
 ```csharp
-using XFE各类拓展.NetCore.XUnit;
-
 [CTest]
 public class TestClass
 {
@@ -110,8 +100,6 @@ public class TestClass
 ### 为测试用例添加描述（CNTest和MNTest）
 
 ```csharp
-using XFE各类拓展.NetCore.XUnit;
-
 [CTest("这是一个测试类")]
 public class TestClass
 {
@@ -128,8 +116,6 @@ public class TestClass
 ### 同时添加描述和结果对比（MNRTest）
 
 ```csharp
-using XFE各类拓展.NetCore.XUnit;
-
 [CTest("这是一个测试类")]
 public class TestClass
 {
@@ -146,8 +132,6 @@ public class TestClass
 ### 设置测试类的初始化方法（SetUp）
 
 ```csharp
-using XFE各类拓展.NetCore.XUnit;
-
 [CTest]
 public class TestClass
 {
@@ -171,8 +155,6 @@ public class TestClass
 ### 直接测试静态方法(SMTest)
 
 ```csharp
-using XFE各类拓展.NetCore.XUnit;
-
 public class TestClass
 {
     [SMTest]

@@ -37,7 +37,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="XFE各类拓展.NetCore" Version="1.5.3" />
+    <PackageReference Include="XFE各类拓展.NetCore" Version="1.6.1" />
   </ItemGroup>
 
 </Project>
