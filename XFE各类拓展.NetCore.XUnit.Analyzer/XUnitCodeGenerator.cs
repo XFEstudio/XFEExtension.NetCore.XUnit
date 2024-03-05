@@ -15,7 +15,7 @@ namespace XFE各类拓展.NetCore.XUnit
 {{
     public static class XUnitCode
     {{
-        public async static Task Main(string[] args) => await XFECode.RunTest();
+        public async static Task Main(string[] args) => await global::XFE各类拓展.NetCore.XUnit.XFECode.RunTest();
     }}
 }}
 ";
