@@ -1,4 +1,4 @@
-﻿namespace XFE各类拓展.NetCore.XUnit.Test;
+﻿namespace XFEExtension.NetCore.XUnit.Test;
 
 class Program
 {

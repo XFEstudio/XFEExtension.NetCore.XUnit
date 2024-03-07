@@ -1,6 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 
-namespace XFE各类拓展.NetCore.XUnit.Analyzer.Generator
+namespace XFEExtension.NetCore.XUnit.Analyzer.Generator
 {
     [Generator]
     public class XUnitCodeGenerator : ISourceGenerator
@@ -9,13 +9,13 @@ namespace XFE各类拓展.NetCore.XUnit.Analyzer.Generator
         {
             context.RegisterForPostInitialization(init =>
             {
-                string globalUsingCode = @"global using global::XFE各类拓展.NetCore.XUnit;";
+                string globalUsingCode = @"global using global::XFEExtension.NetCore.XUnit;";
                 init.AddSource("GlobalUsing.g.cs", globalUsingCode);
-                string xUnitCode = $@"namespace XFE各类拓展.NetCore.XUnit
+                string xUnitCode = $@"namespace XFEExtension.NetCore.XUnit
 {{
     public static class XUnitCode
     {{
-        public async static Task Main(string[] args) => await global::XFE各类拓展.NetCore.XUnit.XFECode.RunTest();
+        public async static Task Main(string[] args) => await global::XFEExtension.NetCore.XUnit.XFECode.RunTest();
     }}
 }}
 ";

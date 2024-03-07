@@ -7,9 +7,9 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using XFE各类拓展.NetCore.XUnit.Analyzer.Diagnostics;
+using XFEExtension.NetCore.XUnit.Analyzer.Diagnostics;
 
-namespace XFE各类拓展.NetCore.XUnit.Analyzer.CodeFix
+namespace XFEExtension.NetCore.XUnit.Analyzer.CodeFix
 {
     [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(XUnitCodeFixProvider))]
     public class XUnitCodeFixProvider : CodeFixProvider

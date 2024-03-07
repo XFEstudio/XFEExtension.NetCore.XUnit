@@ -8,11 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\XFE各类拓展.NetCore.XUnit.Analyzer\XFE各类拓展.NetCore.XUnit.Analyzer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\XFEExtension.NetCore.XUnit.Analyzer\XFEExtension.NetCore.XUnit.Analyzer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
   
   <ItemGroup>
-    <PackageReference Include="XFE各类拓展.NetCore" Version="1.7.5" />
+    <PackageReference Include="XFEExtension.NetCore" Version="1.7.5" />
   </ItemGroup>
   
 </Project>

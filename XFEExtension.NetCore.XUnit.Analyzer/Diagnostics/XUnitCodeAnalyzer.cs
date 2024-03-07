@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 using System.Collections.Immutable;
 using System.Linq;
 
-namespace XFE各类拓展.NetCore.XUnit.Analyzer.Diagnostics
+namespace XFEExtension.NetCore.XUnit.Analyzer.Diagnostics
 {
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     public class XUnitCodeAnalyzer : DiagnosticAnalyzer
@@ -14,7 +14,7 @@ namespace XFE各类拓展.NetCore.XUnit.Analyzer.Diagnostics
         public static readonly DiagnosticDescriptor SMTestError = new DiagnosticDescriptor(SMTestID,
                                                                                            "不能标记非静态方法",
                                                                                            "SMTest特性不能用在静态方法之外的地方：'{0}'",
-                                                                                           "XFE各类拓展.NetCore.XUnit.Analyzer.Diagnostics",
+                                                                                           "XFEExtension.NetCore.XUnit.Analyzer.Diagnostics",
                                                                                            DiagnosticSeverity.Error,
                                                                                            true,
                                                                                            "SMTest特性不能用在静态方法之外的地方.",

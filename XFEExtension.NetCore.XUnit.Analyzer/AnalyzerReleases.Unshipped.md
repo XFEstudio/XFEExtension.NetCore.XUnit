@@ -2,4 +2,4 @@
 
 Rule ID | Category | Severity | Notes
 --------|----------|----------|-------
-XFE0001 | XFE各类拓展.NetCore.XUnit.Analyzer | Error | XUnitCodeAnalyzer
+XFE0001 | XFEExtension.NetCore.XUnit.Analyzer | Error | XUnitCodeAnalyzer
