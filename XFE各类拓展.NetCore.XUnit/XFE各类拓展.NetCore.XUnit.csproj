@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <PackageReleaseNotes>解决引用隐患</PackageReleaseNotes>
+    <PackageReleaseNotes>现在可以完美进行代码诊断并提供代码修补操作</PackageReleaseNotes>
     <Title>XUnit</Title>
     <Authors>XFEstudio</Authors>
     <Company>寰宇朽力网络科技有限公司</Company>
@@ -14,7 +14,7 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/XFEstudio/XFEExtension.NetCore.XUnit</RepositoryUrl>
     <PackageTags>XFE;Test;XUnit;Unit</PackageTags>
-    <Version>1.1.4</Version>
+    <Version>1.1.5</Version>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
   </PropertyGroup>
@@ -37,7 +37,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="XFE各类拓展.NetCore" Version="1.7.5" />
+    <PackageReference Include="XFE各类拓展.NetCore" Version="1.7.6" />
   </ItemGroup>
 
 </Project>
