@@ -15,7 +15,7 @@ namespace XFE各类拓展.NetCore.XUnit.Analyzer
                                                                                            DiagnosticSeverity.Error,
                                                                                            true,
                                                                                            "SMTest特性不能用在静态方法之外的地方.",
-                                                                                           null);
+                                                                                           "https://www.xfegzs.com/codespace/diagnostics/XFE0001");
         public void Initialize(GeneratorInitializationContext context)
         {
         }
