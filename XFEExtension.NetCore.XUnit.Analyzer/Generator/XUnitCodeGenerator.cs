@@ -15,7 +15,10 @@ namespace XFEExtension.NetCore.XUnit.Analyzer.Generator
 {{
     public static class XUnitCode
     {{
-        public async static Task Main(string[] args) => await global::XFEExtension.NetCore.XUnit.XFECode.RunTest();
+        public async static Task Main(string[] args)
+        {{
+            await global::XFEExtension.NetCore.XUnit.XFECode.RunTest();
+        }}
     }}
 }}
 ";

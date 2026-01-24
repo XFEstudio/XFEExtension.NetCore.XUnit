@@ -18,7 +18,7 @@ namespace XFEExtension.NetCore.XUnit.Analyzer.Diagnostics
                                                                                            DiagnosticSeverity.Error,
                                                                                            true,
                                                                                            "SMTest特性不能用在静态方法之外的地方.",
-                                                                                           "https://www.xfegzs.com/codespace/diagnostics/XFE0001.html");
+                                                                                           "https://www.xfegzs.com/Docs/View/Errors%2FXUnit%2FXFE0001");
 
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(SMTestError);
 
