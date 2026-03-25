@@ -18,7 +18,7 @@ namespace XFEExtension.NetCore.XUnit.Analyzer.Diagnostics
                                                                                            DiagnosticSeverity.Error,
                                                                                            true,
                                                                                            "SMTest特性不能用在静态方法之外的地方.",
-                                                                                           "https://www.xfegzs.com/Docs/View/Errors%2FXUnit%2FXFE0001");
+                                                                                           "https://docs.xfegzs.com/View/Errors%2FXUnit%2FXFE0001");
 
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(SMTestError);
 
@@ -35,12 +35,11 @@ namespace XFEExtension.NetCore.XUnit.Analyzer.Diagnostics
             foreach (var syntaxTree in syntaxTrees)
             {
                 var root = syntaxTree.GetRoot();
-                var classes = root.DescendantNodes().OfType<ClassDeclarationSyntax>();
                 var methodDeclarations = root.DescendantNodes().OfType<MethodDeclarationSyntax>();
                 foreach (var methodDeclaration in methodDeclarations)
                 {
                     var modifiers = methodDeclaration.Modifiers;
-                    bool isStatic = modifiers.Any(modifier => modifier.IsKind(SyntaxKind.StaticKeyword));
+                    var isStatic = modifiers.Any(modifier => modifier.IsKind(SyntaxKind.StaticKeyword));
                     if (isStatic)
                         continue;
                     var methodName = methodDeclaration.Identifier.ValueText;

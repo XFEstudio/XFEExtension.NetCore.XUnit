@@ -20,20 +20,18 @@ namespace XFEExtension.NetCore.XUnit.Analyzer.CodeFix
 
         public override Task RegisterCodeFixesAsync(CodeFixContext context)
         {
-            foreach (var diagnostic in context.Diagnostics)
+            foreach (var diagnostic in context.Diagnostics.Where(diagnostic => diagnostic.Id == XUnitCodeAnalyzer.SMTestID))
             {
-                if (diagnostic.Id == XUnitCodeAnalyzer.SMTestID)
-                {
-                    context.RegisterCodeFix(CodeAction.Create(title: "改用MTest特性",
-                                                              createChangedDocument: c => ChangeSMTestToMTestAsync(context.Document, diagnostic, c),
-                                                              equivalenceKey: "改用MTest特性"),
-                                                              diagnostic: diagnostic);
-                    context.RegisterCodeFix(CodeAction.Create(title: "将方法改为静态方法",
-                                                              createChangedDocument: c => MakeMethodStaticAsync(context.Document, diagnostic, c),
-                                                              equivalenceKey: "将方法改为静态方法"),
-                                                              diagnostic: diagnostic);
-                }
+                context.RegisterCodeFix(CodeAction.Create(title: "改用MTest特性",
+                        createChangedDocument: c => ChangeSMTestToMTestAsync(context.Document, diagnostic, c),
+                        equivalenceKey: "改用MTest特性"),
+                    diagnostic: diagnostic);
+                context.RegisterCodeFix(CodeAction.Create(title: "将方法改为静态方法",
+                        createChangedDocument: c => MakeMethodStaticAsync(context.Document, diagnostic, c),
+                        equivalenceKey: "将方法改为静态方法"),
+                    diagnostic: diagnostic);
             }
+
             return Task.CompletedTask;
         }
 

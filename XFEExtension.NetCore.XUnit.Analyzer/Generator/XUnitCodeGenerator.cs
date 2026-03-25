@@ -9,19 +9,24 @@ namespace XFEExtension.NetCore.XUnit.Analyzer.Generator
         {
             context.RegisterForPostInitialization(init =>
             {
-                string globalUsingCode = @"global using global::XFEExtension.NetCore.XUnit;";
+                const string globalUsingCode = """
+                                               global using global::XFEExtension.NetCore.XUnit;
+                                               global using global::XFEExtension.NetCore.XUnit，Attributes;
+                                               """;
                 init.AddSource("GlobalUsing.g.cs", globalUsingCode);
-                string xUnitCode = $@"namespace XFEExtension.NetCore.XUnit
-{{
-    public static class XUnitCode
-    {{
-        public async static Task Main(string[] args)
-        {{
-            await global::XFEExtension.NetCore.XUnit.XFECode.RunTest();
-        }}
-    }}
-}}
-";
+                const string xUnitCode = """
+                                         namespace XFEExtension.NetCore.XUnit
+                                         {
+                                             public static class XUnitCode
+                                             {
+                                                 public async static Task Main(string[] args)
+                                                 {
+                                                     await global::XFEExtension.NetCore.XUnit.XFECode.RunTest();
+                                                 }
+                                             }
+                                         }
+
+                                         """;
                 init.AddSource($"XUnitCode.g.cs", xUnitCode);
             });
         }
