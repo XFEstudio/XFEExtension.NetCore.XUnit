@@ -11,7 +11,7 @@ namespace XFEExtension.NetCore.XUnit.Analyzer.Generator
             {
                 const string globalUsingCode = """
                                                global using global::XFEExtension.NetCore.XUnit;
-                                               global using global::XFEExtension.NetCore.XUnit，Attributes;
+                                               global using global::XFEExtension.NetCore.XUnit.Attributes;
                                                """;
                 init.AddSource("GlobalUsing.g.cs", globalUsingCode);
                 const string xUnitCode = """

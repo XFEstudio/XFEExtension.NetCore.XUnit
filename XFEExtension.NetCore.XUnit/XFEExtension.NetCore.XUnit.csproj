@@ -13,14 +13,14 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/XFEstudio/XFEExtension.NetCore.XUnit</RepositoryUrl>
     <PackageTags>XFE;Test;XUnit;Unit</PackageTags>
-    <Version>2.1.0</Version>
+    <Version>2.1.1</Version>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
 	  <PackageReleaseNotes>
-		  优化分析器与生成器，升级包版本至2.1.0
+      修复全局 using 拼写错误并升级版本至 2.1.1
 
-		  重构了 RegisterCodeFixesAsync 方法，提升代码简洁性；修正诊断文档链接及变量声明风格；生成器采用 C# 11 原始字符串字面量并补充全局 using，修正命名空间拼写；csproj 增加 LangVersion 支持最新特性，NuGet 包版本升级至 2.1.0。
-	  </PackageReleaseNotes>
+      修正了全局 using 语句中的命名空间拼写错误，避免因中文逗号导致的命名空间解析问题。同时将 NuGet 包版本号从 2.1.0 升级至 2.1.1。
+    </PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
