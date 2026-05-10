@@ -5,26 +5,26 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![.NET](https://img.shields.io/badge/.NET-8.0-512BD4)](https://dotnet.microsoft.com/download/dotnet/8.0)
 
-English | [中文](./README.zh-CN.md)
+[English](./README.md) | 中文
 
-## Description
+## 描述
 
-XFEExtension.NetCore.XUnit is an XUnit-based testing framework that lets you run tests without writing a `Main` method. Simply annotate the classes or methods you want to test with the provided attributes.
+XUnit测试框架，使得用户不需要编写Main函数，只需要在需要测试的类或者方法上面加上相对于的特性即可。
 
-## Examples
+## 示例
 
-### Quick parameterless test cases (CTest & MTest)
+### 快速编写无参测试用例（CTest和MTest）
 
 ```csharp
 [CTest]
 //[CTest]
-// Multiple test cases can be added
+//可添加多个测试用例
 public class TestClass
 {
     [MTest]
     //[MTest]
     //[MTest]
-    // Multiple test cases can be added
+    //可添加多个测试用例
     public void TestMethod()
     {
         Console.WriteLine("Hello World!");
@@ -34,7 +34,7 @@ public class TestClass
 
 ---
 
-### Test cases with parameters
+### 带参数的测试用例
 
 ```csharp
 [CTest]
@@ -52,7 +52,7 @@ public class TestClass
 
 ---
 
-### Assertions (via inheritance)
+### 使用断言（通过继承类）
 
 ```csharp
 [CTest]
@@ -62,14 +62,14 @@ public class TestClass : XFECode
     [MTest(2, 3)]
     public void TestMethod(int a, int b)
     {
-        Assert(a + b == 3, "Not equal to 3");
+        Assert(a + b == 3, "不等于3");
     }
 }
 ```
 
 ---
 
-### Assertions (without inheritance)
+### 使用断言（不继承）
 
 ```csharp
 [CTest]
@@ -79,14 +79,14 @@ public class TestClass
     [MTest(2, 3)]
     public void TestMethod(int a, int b)
     {
-        XFECode.Assert(a + b == 3, "Not equal to 3");
+        XFECode.Assert(a + b == 3, "不等于3");
     }
 }
 ```
 
 ---
 
-### Verify return value equality (MRTest)
+### 判断返回值是否相等（MRTest）
 
 ```csharp
 [CTest]
@@ -104,13 +104,13 @@ public class TestClass
 
 ---
 
-### Add descriptions to test cases (CNTest & MNTest)
+### 为测试用例添加描述（CNTest和MNTest）
 
 ```csharp
-[CTest("This is a test class")]
+[CTest("这是一个测试类")]
 public class TestClass
 {
-    [MNTest("This is a test method")]
+    [MNTest("这是一个测试方法")]
     public void TestMethod()
     {
         Console.WriteLine("Hello World!");
@@ -120,13 +120,13 @@ public class TestClass
 
 ---
 
-### Add description and return-value comparison together (MNRTest)
+### 同时添加描述和结果对比（MNRTest）
 
 ```csharp
-[CTest("This is a test class")]
+[CTest("这是一个测试类")]
 public class TestClass
 {
-    [MNRTest("This is a test method", 1, 2, 3)]
+    [MNRTest("这是一个测试方法", 1, 2, 3)]
     public int TestMethod(int a, int b)
     {
         return a + b;
@@ -136,14 +136,13 @@ public class TestClass
 
 ---
 
-### Set an initialization method for the test class (SetUp)
+### 设置测试类的初始化方法（SetUp）
 
 ```csharp
 [CTest]
 public class TestClass
 {
     string initWord;
-
     [SetUp]
     public void SetUp()
     {
@@ -160,7 +159,7 @@ public class TestClass
 
 ---
 
-### Test static methods directly (SMTest)
+### 直接测试静态方法(SMTest)
 
 ```csharp
 public class TestClass
