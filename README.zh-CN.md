@@ -1,11 +1,11 @@
 # XFEExtension.NetCore.XUnit
 
-[![NuGet Version](https://img.shields.io/nuget/v/XFEExtension.NetCore.XUnit)](https://www.nuget.org/packages/XFEExtension.NetCore.XUnit)
-[![NuGet Downloads](https://img.shields.io/nuget/dt/XFEExtension.NetCore.XUnit)](https://www.nuget.org/packages/XFEExtension.NetCore.XUnit)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
-[![.NET](https://img.shields.io/badge/.NET-8.0-512BD4)](https://dotnet.microsoft.com/download/dotnet/8.0)
+[![NuGet](https://img.shields.io/nuget/v/XFEExtension.NetCore.XUnit?label=NuGet&logo=NuGet)](https://www.nuget.org/packages/XFEExtension.NetCore.XUnit/)
+[![NuGet Downloads](https://img.shields.io/nuget/dt/XFEExtension.NetCore.XUnit?label=Downloads&logo=NuGet)](https://www.nuget.org/packages/XFEExtension.NetCore.XUnit/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE.txt)
+[![.NET](https://img.shields.io/badge/.NET-10.0-512BD4)](https://dotnet.microsoft.com/download)
 
-[English](./README.md) | 中文
+> 📖 [English](https://github.com/XFEstudio/XFEExtension.NetCore.XUnit/blob/master/README.md) | 简体中文
 
 ## 描述
 
