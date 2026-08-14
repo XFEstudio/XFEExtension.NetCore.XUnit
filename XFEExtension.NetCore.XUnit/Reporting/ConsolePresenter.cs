@@ -1,11 +1,24 @@
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text;
 using XFEExtension.NetCore.XUnit.Runtime;
 
 namespace XFEExtension.NetCore.XUnit.Reporting;
 
 internal sealed class ConsolePresenter(ConsoleLocalizer text)
 {
+    public static void ConfigureConsole()
+    {
+        try
+        {
+            if (Console.OutputEncoding.CodePage != Encoding.UTF8.CodePage)
+                Console.OutputEncoding = new UTF8Encoding(false);
+        }
+        catch
+        {
+        }
+    }
+
     public void PrintHeader(bool runTests, bool runBenchmarks, int testCount, int benchmarkCount, XfeRunSettings settings)
     {
         var version = typeof(ConsolePresenter).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
@@ -23,20 +36,31 @@ internal sealed class ConsolePresenter(ConsoleLocalizer text)
             : text.Select("Off", "关闭");
 
         WriteTitle($"XFE Test Runner {version}");
-        WriteMetadata(text.Select("Mode", "模式"), mode);
-        WriteMetadata(text.Select("Language", "语言"), text.LanguageName);
-        WriteMetadata(text.Select("Discovered", "已发现"), discovered);
+        var metadata = new List<(string Label, string Value)>
+        {
+            (text.Select("Mode", "模式"), mode),
+            (text.Select("Runtime", "运行时"), RuntimeInformation.FrameworkDescription),
+            (text.Select("Language", "语言"), text.LanguageName),
+            (text.Select("Platform", "平台"), $"{RuntimeInformation.OSDescription} · {RuntimeInformation.ProcessArchitecture}"),
+            (text.Select("Discovered", "已发现"), discovered)
+        };
         if (runTests)
-            WriteMetadata(text.Select("Parallel", "并行"), parallelism);
-        WriteMetadata(text.Select("Runtime", "运行时"), RuntimeInformation.FrameworkDescription);
-        WriteMetadata(text.Select("Platform", "平台"), $"{RuntimeInformation.OSDescription} · {RuntimeInformation.ProcessArchitecture}");
+            metadata.Add((text.Select("Parallel", "并行"), parallelism));
+        else if (runBenchmarks)
+            metadata.Add((
+                text.Select("Job", "作业"),
+                text.Select(
+                    $"{settings.Benchmark.TargetIterationMilliseconds} ms target · {settings.Benchmark.MinIterationCount}-{settings.Benchmark.MaxIterationCount} samples",
+                    $"目标 {settings.Benchmark.TargetIterationMilliseconds} ms · {settings.Benchmark.MinIterationCount}-{settings.Benchmark.MaxIterationCount} 个样本")));
+        WriteMetadataGrid(metadata);
         WriteRule('╰', '─', '╯');
         Console.WriteLine();
     }
 
     public void PrintList(IReadOnlyList<TestDescriptor> tests, IReadOnlyList<BenchmarkDescriptor> benchmarks)
     {
-        WriteSection(text.Select("Discovered work", "发现的项目"));
+        var itemCount = tests.Count + benchmarks.Count;
+        WriteSection(text.Select("Discovered work", "发现的项目"), text.Select($"{itemCount} {(itemCount == 1 ? "item" : "items")}", $"{itemCount} 项"));
         foreach (var test in tests)
             WriteListItem(text.Select("TEST", "测试"), test.Id, test.DisplayName, ConsoleColor.Cyan);
         foreach (var benchmark in benchmarks)
@@ -51,7 +75,7 @@ internal sealed class ConsolePresenter(ConsoleLocalizer text)
 
     public void PrintTests(TestRunSummary summary)
     {
-        WriteSection(text.Select("Test results", "测试结果"));
+        WriteSection(text.Select("Test results", "测试结果"), text.Select($"{summary.Total} {(summary.Total == 1 ? "test" : "tests")}", $"{summary.Total} 个测试"));
         if (summary.Results.Count == 0)
         {
             WriteColoredLine(text.Select("  No tests matched the current filters.", "  没有测试符合当前筛选条件。"), ConsoleColor.Yellow);
@@ -60,19 +84,24 @@ internal sealed class ConsolePresenter(ConsoleLocalizer text)
             return;
         }
 
+        var consoleWidth = SafeConsoleWidth();
+        const int statusWidth = 10;
+        const int durationWidth = 14;
+        var nameWidth = Math.Max(20, consoleWidth - statusWidth - durationWidth - 4);
+        var headers = new[]
+        {
+            text.Select("Status", "状态"),
+            text.Select("Test", "测试"),
+            text.Select("Duration", "耗时")
+        };
+        WriteTestRow(headers[0], headers[1], headers[2], statusWidth, nameWidth, durationWidth, ConsoleColor.Cyan, false);
+        WriteTableRule([statusWidth, nameWidth, durationWidth]);
+
         foreach (var result in summary.Results)
         {
             var color = OutcomeColor(result.Outcome);
-            var marker = result.Outcome switch
-            {
-                TestOutcome.Passed => "✓",
-                TestOutcome.Skipped => "↷",
-                TestOutcome.TimedOut => "⌛",
-                _ => "✗"
-            };
-            WriteColored($"  {marker} {PadDisplay(text.Outcome(result.Outcome), 7)}", color);
-            Console.Write($" {result.DisplayName}");
-            WriteColoredLine($"  {FormatDuration(result.TotalDuration)}", ConsoleColor.DarkGray);
+            var duration = result.Outcome == TestOutcome.Skipped ? "—" : FormatDuration(result.TotalDuration);
+            WriteTestRow(text.Outcome(result.Outcome), result.DisplayName, duration, statusWidth, nameWidth, durationWidth, color, true);
 
             if (!string.IsNullOrWhiteSpace(result.Message))
             {
@@ -89,11 +118,12 @@ internal sealed class ConsolePresenter(ConsoleLocalizer text)
 
         Console.WriteLine();
         PrintTestSummary(summary);
+        PrintSlowestTests(summary);
     }
 
     public void PrintBenchmarks(BenchmarkRunSummary summary)
     {
-        WriteSection(text.Select("Benchmark results", "基准结果"));
+        WriteSection(text.Select("Benchmark results", "基准结果"), text.Select($"{summary.Benchmarks.Count} {(summary.Benchmarks.Count == 1 ? "benchmark" : "benchmarks")}", $"{summary.Benchmarks.Count} 个基准"));
         if (summary.Benchmarks.Count == 0)
         {
             WriteColoredLine(text.Select("  No benchmarks matched the current filters.", "  没有基准符合当前筛选条件。"), ConsoleColor.Yellow);
@@ -166,35 +196,41 @@ internal sealed class ConsolePresenter(ConsoleLocalizer text)
         foreach (var benchmark in summary.Benchmarks.Where(static benchmark => benchmark.Warnings.Count > 0))
         {
             Console.WriteLine();
-            WriteColoredLine($"  ⚠ {benchmark.DisplayName}", ConsoleColor.Yellow);
+            WriteColoredLine($"  [!] {benchmark.DisplayName}", ConsoleColor.Yellow);
             foreach (var warning in benchmark.Warnings)
                 Console.WriteLine($"    {text.Warning(warning)}");
         }
 
         Console.WriteLine();
-        WriteRule('─', '─', '─');
         var convergence = summary.Benchmarks.Count(static benchmark => benchmark.Statistics.Converged);
         var resultText = summary.RegressionDetected
             ? text.Select("Performance regression detected", "检测到性能回归")
             : text.Select("No gated regression detected", "未检测到门禁性能回归");
-        WriteColoredLine(
-            text.Select(
-                $"{(summary.Benchmarks.Count == 1 ? "Benchmark" : "Benchmarks")}: {summary.Benchmarks.Count}  Converged: {convergence}  Duration: {FormatDuration(summary.Duration)}  {resultText}",
-                $"基准：{summary.Benchmarks.Count}  已收敛：{convergence}  用时：{FormatDuration(summary.Duration)}  {resultText}"),
+        WriteSection(text.Select("Benchmark summary", "基准汇总"));
+        WriteColored($"  {PadDisplay(text.Select("Result", "结果"), 14)}", ConsoleColor.DarkGray);
+        WriteBadge(summary.RegressionDetected ? text.Select("FAILED", "回归") : text.Select("PASSED", "通过"), 10,
             summary.RegressionDetected ? ConsoleColor.Red : ConsoleColor.Green);
+        Console.Write("    ");
+        WriteColoredLine(resultText, summary.RegressionDetected ? ConsoleColor.Red : ConsoleColor.Green);
+        WriteColored($"  {PadDisplay(text.Select("Benchmarks", "基准"), 14)}", ConsoleColor.DarkGray);
+        WriteColored(text.Select($"{summary.Benchmarks.Count} total", $"总计 {summary.Benchmarks.Count}"), ConsoleColor.White);
+        Console.Write("    ");
+        WriteColored(text.Select($"{convergence} converged", $"已收敛 {convergence}"), ConsoleColor.Green);
+        Console.Write("    ");
+        WriteColoredLine(text.Select($"Duration  {FormatDuration(summary.Duration)}", $"用时  {FormatDuration(summary.Duration)}"), ConsoleColor.White);
     }
 
     public void PrintArtifacts(string path)
     {
         Console.WriteLine();
-        WriteColored(text.Select("Artifacts", "报告产物"), ConsoleColor.Cyan);
-        Console.WriteLine($": {Path.GetFullPath(path)}");
+        WriteSection(text.Select("Artifacts", "报告产物"));
+        WriteColoredLine($"  {Path.GetFullPath(path)}", ConsoleColor.DarkGray);
     }
 
     public void PrintHelp()
     {
         WriteTitle("XFE Test Runner 4.0");
-        WriteMetadata(text.Select("Usage", "用法"), text.Select("<test application> [options]", "<测试程序> [选项]"));
+        WriteMetadataGrid([(text.Select("Usage", "用法"), text.Select("<test application> [options]", "<测试程序> [选项]"))]);
         WriteRule('╰', '─', '╯');
         Console.WriteLine();
         WriteHelpSection(text.Select("Run selection", "运行选择"),
@@ -240,21 +276,61 @@ internal sealed class ConsolePresenter(ConsoleLocalizer text)
 
     private void PrintTestSummary(TestRunSummary summary)
     {
-        WriteRule('─', '─', '─');
-        WriteColored(text.Select($"Total {summary.Total}", $"总计 {summary.Total}"), ConsoleColor.White);
-        Console.Write("  ");
-        WriteColored(text.Select($"Passed {summary.Passed}", $"通过 {summary.Passed}"), ConsoleColor.Green);
-        Console.Write("  ");
-        WriteColored(text.Select($"Failed {summary.Failed}", $"失败 {summary.Failed}"), summary.Failed == 0 ? ConsoleColor.DarkGray : ConsoleColor.Red);
-        Console.Write("  ");
-        WriteColored(text.Select($"Skipped {summary.Skipped}", $"跳过 {summary.Skipped}"), ConsoleColor.Yellow);
-        Console.WriteLine(text.Select($"  Duration {FormatDuration(summary.Duration)}", $"  用时 {FormatDuration(summary.Duration)}"));
+        WriteSection(text.Select("Run summary", "运行汇总"));
+        var executed = summary.Passed + summary.Failed;
+        var successRate = executed == 0 ? 0d : summary.Passed * 100d / executed;
+        var resultLabel = summary.Failed == 0 ? text.Select("PASSED", "通过") : text.Select("FAILED", "失败");
+
+        WriteColored($"  {PadDisplay(text.Select("Result", "结果"), 14)}", ConsoleColor.DarkGray);
+        WriteBadge(resultLabel, 10, summary.Failed == 0 ? ConsoleColor.Green : ConsoleColor.Red);
+        Console.Write("    ");
+        WriteColored(text.Select($"Duration  {FormatDuration(summary.Duration)}", $"用时  {FormatDuration(summary.Duration)}"), ConsoleColor.White);
+        Console.WriteLine();
+
+        WriteColored($"  {PadDisplay(text.Select("Tests", "测试"), 14)}", ConsoleColor.DarkGray);
+        WriteColored(text.Select($"{summary.Total} total", $"总计 {summary.Total}"), ConsoleColor.White);
+        Console.Write("    ");
+        WriteColored(text.Select($"{summary.Passed} passed", $"通过 {summary.Passed}"), ConsoleColor.Green);
+        Console.Write("    ");
+        WriteColored(text.Select($"{summary.Failed} failed", $"失败 {summary.Failed}"), summary.Failed == 0 ? ConsoleColor.DarkGray : ConsoleColor.Red);
+        Console.Write("    ");
+        WriteColoredLine(text.Select($"{summary.Skipped} skipped", $"跳过 {summary.Skipped}"), ConsoleColor.Yellow);
+
+        var barWidth = Math.Clamp(SafeConsoleWidth() - 36, 20, 48);
+        var filled = executed == 0 ? 0 : Math.Clamp((int)Math.Round(barWidth * successRate / 100d), 0, barWidth);
+        WriteColored($"  {PadDisplay(text.Select("Success rate", "成功率"), 14)}", ConsoleColor.DarkGray);
+        WriteColored("[", ConsoleColor.DarkGray);
+        WriteColored(new string('█', filled), summary.Failed == 0 ? ConsoleColor.Green : ConsoleColor.Yellow);
+        WriteColored(new string('·', barWidth - filled), ConsoleColor.DarkGray);
+        WriteColored("]", ConsoleColor.DarkGray);
+        WriteColoredLine($"  {successRate:F1}%", summary.Failed == 0 ? ConsoleColor.Green : ConsoleColor.Yellow);
+    }
+
+    private void PrintSlowestTests(TestRunSummary summary)
+    {
+        var slowest = summary.Results
+            .Where(static result => result.Outcome != TestOutcome.Skipped)
+            .OrderByDescending(static result => result.TotalDuration)
+            .Take(3)
+            .ToArray();
+        if (slowest.Length == 0)
+            return;
+
+        Console.WriteLine();
+        WriteColoredLine(text.Select("  Slowest tests", "  最慢测试"), ConsoleColor.DarkCyan);
+        var nameWidth = Math.Max(20, SafeConsoleWidth() - 24);
+        for (var index = 0; index < slowest.Length; index++)
+        {
+            WriteColored($"  {index + 1}. ", ConsoleColor.DarkGray);
+            WriteColored(PadDisplay(TruncateDisplay(slowest[index].DisplayName, nameWidth), nameWidth), ConsoleColor.Gray);
+            WriteColoredLine(PadLeftDisplay(FormatDuration(slowest[index].TotalDuration), 16), ConsoleColor.DarkGray);
+        }
     }
 
     private void WriteTitle(string title)
     {
         var width = SafeConsoleWidth();
-        var suffixLength = Math.Max(1, width - DisplayWidth(title) - 4);
+        var suffixLength = Math.Max(1, width - DisplayWidth(title) - 5);
         WriteColored($"╭─ {title} ", ConsoleColor.Cyan);
         WriteColoredLine(new string('─', suffixLength) + "╮", ConsoleColor.DarkCyan);
     }
@@ -262,33 +338,81 @@ internal sealed class ConsolePresenter(ConsoleLocalizer text)
     private static void WriteMetadata(string label, string value, string indent = "│ ")
     {
         Console.Write(indent);
-        Console.Write(PadDisplay(label, 12));
-        Console.WriteLine(value);
+        WriteColored(PadDisplay(label, 12), ConsoleColor.DarkGray);
+        WriteColoredLine(value, ConsoleColor.White);
     }
 
-    private void WriteSection(string title)
+    private static void WriteMetadataGrid(IReadOnlyList<(string Label, string Value)> metadata)
     {
-        WriteColoredLine(title, ConsoleColor.Cyan);
-        WriteColoredLine(new string('─', Math.Min(SafeConsoleWidth(), Math.Max(32, DisplayWidth(title) + 12))), ConsoleColor.DarkCyan);
+        var width = SafeConsoleWidth();
+        if (width < 120)
+        {
+            foreach (var item in metadata)
+                WriteMetadataBoxRow(item, null, width);
+            return;
+        }
+
+        for (var index = 0; index < metadata.Count; index += 2)
+            WriteMetadataBoxRow(metadata[index], index + 1 < metadata.Count ? metadata[index + 1] : null, width);
+    }
+
+    private static void WriteMetadataBoxRow((string Label, string Value) left, (string Label, string Value)? right, int width)
+    {
+        var contentWidth = width - 4;
+        Console.Write("│ ");
+        if (right.HasValue)
+        {
+            var leftWidth = (contentWidth - 3) / 2;
+            var rightWidth = contentWidth - 3 - leftWidth;
+            WriteMetadataCell(left, leftWidth);
+            WriteColored(" │ ", ConsoleColor.DarkCyan);
+            WriteMetadataCell(right.Value, rightWidth);
+        }
+        else
+        {
+            WriteMetadataCell(left, contentWidth);
+        }
+        Console.WriteLine(" │");
+    }
+
+    private static void WriteMetadataCell((string Label, string Value) item, int width)
+    {
+        const int labelWidth = 12;
+        var valueWidth = Math.Max(1, width - labelWidth);
+        WriteColored(PadDisplay(TruncateDisplay(item.Label, labelWidth), labelWidth), ConsoleColor.DarkGray);
+        WriteColored(PadDisplay(TruncateDisplay(item.Value, valueWidth), valueWidth), ConsoleColor.White);
+    }
+
+    private void WriteSection(string title, string? suffix = null)
+    {
+        var heading = suffix is null ? title : $"{title} · {suffix}";
+        heading = TruncateDisplay(heading, Math.Max(10, SafeConsoleWidth() - 5));
+        var prefix = $"── {heading} ";
+        WriteColored(prefix, ConsoleColor.Cyan);
+        WriteColoredLine(new string('─', Math.Max(1, SafeConsoleWidth() - DisplayWidth(prefix))), ConsoleColor.DarkCyan);
     }
 
     private void WriteListItem(string kind, string id, string displayName, ConsoleColor color)
     {
-        WriteColored($"  {PadDisplay(kind, 7)}", color);
-        Console.WriteLine($" {displayName}  [{id}]");
+        WriteBadge(kind, 9, color);
+        Console.Write("  ");
+        WriteColored(displayName, ConsoleColor.White);
+        WriteColoredLine($"  {id}", ConsoleColor.DarkGray);
     }
 
     private static void WriteDetail(string label, string value, ConsoleColor color)
     {
-        WriteColored($"      {label}: ", color);
-        Console.WriteLine(value);
+        Console.Write(new string(' ', 12));
+        WriteColored($"└─ {label}  ", color);
+        WriteColoredLine(value, ConsoleColor.Gray);
     }
 
     private static void WriteBlock(string label, string value, ConsoleColor color)
     {
-        WriteColoredLine($"      {label}:", color);
+        var indent = new string(' ', 12);
+        WriteColoredLine($"{indent}└─ {label}", color);
         foreach (var line in value.Replace("\r\n", "\n", StringComparison.Ordinal).Split('\n'))
-            Console.WriteLine($"        {line}");
+            WriteColoredLine($"{indent}   {line}", ConsoleColor.DarkGray);
     }
 
     private static void WriteHelpSection(string title, params (string Option, string Description)[] items)
@@ -301,6 +425,25 @@ internal sealed class ConsolePresenter(ConsoleLocalizer text)
             Console.WriteLine(item.Description);
         }
         Console.WriteLine();
+    }
+
+    private static void WriteTestRow(string status, string name, string duration, int statusWidth, int nameWidth, int durationWidth, ConsoleColor color, bool badge)
+    {
+        if (badge)
+            WriteBadge(status, statusWidth, color);
+        else
+            WriteColored(PadDisplay(status, statusWidth), color);
+        Console.Write("  ");
+        WriteColored(PadDisplay(TruncateDisplay(name, nameWidth), nameWidth), badge ? ConsoleColor.Gray : color);
+        Console.Write("  ");
+        WriteColoredLine(PadLeftDisplay(duration, durationWidth), badge ? ConsoleColor.DarkGray : color);
+    }
+
+    private static void WriteBadge(string value, int width, ConsoleColor color)
+    {
+        var innerWidth = Math.Max(1, width - 2);
+        var content = CenterDisplay(TruncateDisplay(value, innerWidth), innerWidth);
+        WriteColored($"[{content}]", color);
     }
 
     private static void WriteTableRow(IReadOnlyList<string> values, IReadOnlyList<int> widths, ConsoleColor color)
@@ -364,7 +507,7 @@ internal sealed class ConsolePresenter(ConsoleLocalizer text)
         try
         {
             var width = Console.WindowWidth;
-            return width > 0 ? Math.Clamp(width - 1, 96, 150) : 120;
+            return width > 0 ? Math.Clamp(width - 1, 72, 200) : 120;
         }
         catch
         {
@@ -378,6 +521,19 @@ internal sealed class ConsolePresenter(ConsoleLocalizer text)
     {
         var padding = Math.Max(0, width - DisplayWidth(value));
         return value + new string(' ', padding);
+    }
+
+    private static string PadLeftDisplay(string value, int width)
+    {
+        var padding = Math.Max(0, width - DisplayWidth(value));
+        return new string(' ', padding) + value;
+    }
+
+    private static string CenterDisplay(string value, int width)
+    {
+        var padding = Math.Max(0, width - DisplayWidth(value));
+        var left = padding / 2;
+        return new string(' ', left) + value + new string(' ', padding - left);
     }
 
     private static string TruncateDisplay(string value, int width)

@@ -56,6 +56,7 @@ public static partial class XFERunner
     /// <returns>表示运行完成的任务；结果为 <see cref="SuccessExitCode"/> 等标准退出码之一。</returns>
     public static async Task<int> RunAsync(string[] args, XfeRegistry registry, CancellationToken cancellationToken = default)
     {
+        ConsolePresenter.ConfigureConsole();
         var presenter = new ConsolePresenter(new ConsoleLocalizer(ConsoleLanguage.Auto));
         try
         {

@@ -33,7 +33,7 @@ dotnet run -c Release -- --filter Calculator --category Unit
 
 Different classes run in parallel by default while methods in one class remain serial. Use `[Collection]`, `[NonParallel]`, `[Timeout]`, and `[Isolated]` for shared resources and process isolation. Results are exported as console output, JSON, and JUnit XML.
 
-The console automatically selects Simplified Chinese when the current UI culture is Chinese and otherwise falls back to English. Override it at any time with `--language en`, `--language zh`, or `--language auto`. The console includes a run header, colored status lines, failure details, an aligned benchmark table, environment information, convergence warnings, and a compact summary; redirected output remains plain text and honors `NO_COLOR`.
+The console automatically selects Simplified Chinese when the current UI culture is Chinese and otherwise falls back to English. Override it at any time with `--language en`, `--language zh`, or `--language auto`. The adaptive interface includes a two-column run card, encoding-safe status badges, aligned test durations, hierarchical failure details, success-rate and slow-test summaries, benchmark environment information, convergence warnings, and a detailed benchmark table. Redirected output remains plain text and honors `NO_COLOR`.
 
 ## Benchmarks
 

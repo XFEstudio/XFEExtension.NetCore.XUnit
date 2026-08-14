@@ -31,7 +31,7 @@ dotnet run -c Release -- --filter Calculator --category Unit
 
 默认情况下，不同测试类并行、同一类内串行。可通过 `[Collection]`、`[NonParallel]`、`[Timeout]` 和 `[Isolated]` 管理共享资源及子进程隔离。结果会导出到控制台、JSON 和 JUnit XML。
 
-控制台会根据当前用户界面区域自动识别语言：中文区域使用简体中文，其他及无法识别的区域默认使用英文。可随时通过 `--language en`、`--language zh` 或 `--language auto` 手动覆盖。新版控制台提供运行信息、彩色状态、失败详情、对齐的基准表格、环境信息、收敛警告和汇总；重定向时保持纯文本，并支持 `NO_COLOR`。
+控制台会根据当前用户界面区域自动识别语言：中文区域使用简体中文，其他及无法识别的区域默认使用英文。可随时通过 `--language en`、`--language zh` 或 `--language auto` 手动覆盖。自适应界面提供双栏运行卡片、编码安全的状态徽章、对齐的测试耗时、层级化失败详情、成功率与最慢测试汇总，以及包含环境和收敛警告的详细基准表格。重定向时保持纯文本，并支持 `NO_COLOR`。
 
 ## 性能基准
 
