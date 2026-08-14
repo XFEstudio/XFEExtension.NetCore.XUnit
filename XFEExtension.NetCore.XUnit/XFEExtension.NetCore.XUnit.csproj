@@ -2,22 +2,24 @@
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
-    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Title>XUnit</Title>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <Title>XFEExtension.NetCore.XUnit</Title>
     <Authors>XFEstudio</Authors>
     <Company>寰宇朽力网络科技有限公司</Company>
-    <Description>提供方便快捷的测试，无需编写Main方法，可直接添加特性在类或方法上进行测试</Description>
+    <Description>独立的 .NET 测试与统计基准运行器。与 xUnit.net 项目无关。</Description>
     <Copyright>寰宇朽力网络科技有限公司版权所有</Copyright>
     <PackageProjectUrl>https://github.com/XFEstudio/XFEExtension.NetCore.XUnit</PackageProjectUrl>
     <PackageIcon>logoIcon.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/XFEstudio/XFEExtension.NetCore.XUnit</RepositoryUrl>
-    <PackageTags>XFE;Test;XUnit;Unit</PackageTags>
-    <Version>3.0.0</Version>
+    <PackageTags>XFE;Test;Benchmark;Runner;Unit</PackageTags>
+    <Version>4.0.0</Version>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
 	  <PackageReleaseNotes>
-      版本更新至.NET 10.0，更新MD文档
+      4.0 重建独立测试运行时、增量生成器与自适应基准引擎。
     </PackageReleaseNotes>
   </PropertyGroup>
 
@@ -35,11 +37,8 @@
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
-    <None Include="..\XFEExtension.NetCore.XUnit.Analyzer\bin\Release\netstandard2.0\XFEExtension.NetCore.XUnit.Analyzer.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="XFEExtension.NetCore" Version="3.0.3" />
+    <None Include="..\XFEExtension.NetCore.XUnit.Analyzer\bin\$(Configuration)\netstandard2.0\XFEExtension.NetCore.XUnit.Analyzer.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+    <None Include="..\XFEExtension.NetCore.XUnit.CodeFixes\bin\$(Configuration)\netstandard2.0\XFEExtension.NetCore.XUnit.CodeFixes.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
   </ItemGroup>
 
 </Project>

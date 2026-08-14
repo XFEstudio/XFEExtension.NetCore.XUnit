@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\XFEExtension.NetCore.XUnit.Analyzer\XFEExtension.NetCore.XUnit.Analyzer.csproj" />
+    <Compile Include="..\XFEExtension.NetCore.XUnit.Analyzer\CodeFix\XUnitCodeFixProvider.cs" Link="CodeFix\XUnitCodeFixProvider.cs" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.14.0" PrivateAssets="all" />
+  </ItemGroup>
+</Project>
