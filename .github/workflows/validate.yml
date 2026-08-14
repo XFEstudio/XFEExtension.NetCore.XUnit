@@ -13,10 +13,15 @@ permissions:
 env:
   DOTNET_VERSION: 10.0.x
   SOLUTION_PATH: XFEExtension.NetCore.XUnit.slnx
+  TEST_PROJECT: XFEExtension.NetCore.XUnit.Test/XFEExtension.NetCore.XUnit.Test.csproj
 
 jobs:
-  build:
-    runs-on: windows-latest
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout
@@ -32,3 +37,18 @@ jobs:
 
       - name: Build
         run: dotnet build ${{ env.SOLUTION_PATH }} --configuration Release --no-restore -p:GeneratePackageOnBuild=false -p:ContinuousIntegrationBuild=true
+
+      - name: Run self-tests
+        run: dotnet run --project ${{ env.TEST_PROJECT }} --configuration Release --no-build -- --artifacts "${{ runner.temp }}/xfe-test-artifacts"
+
+      - name: Run benchmark smoke test
+        if: runner.os == 'Windows'
+        run: dotnet run --project ${{ env.TEST_PROJECT }} --configuration Release --no-build -- --benchmarks --quick --artifacts "${{ runner.temp }}/xfe-benchmark-artifacts"
+
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports-${{ matrix.os }}
+          path: ${{ runner.temp }}/xfe-*-artifacts
+          if-no-files-found: warn
