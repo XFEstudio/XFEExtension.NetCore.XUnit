@@ -2,8 +2,9 @@ using System.Globalization;
 using System.Text;
 using System.Text.Json;
 using System.Xml.Linq;
+using XFEExtension.NetCore.XUnit.Runtime;
 
-namespace XFEExtension.NetCore.XUnit;
+namespace XFEExtension.NetCore.XUnit.Reporting;
 
 internal static class BuiltInReporters
 {

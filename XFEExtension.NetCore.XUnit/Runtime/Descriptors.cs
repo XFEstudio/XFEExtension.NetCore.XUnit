@@ -1,7 +1,7 @@
 using System.Text.Json.Serialization;
 using XFEExtension.NetCore.XUnit.Attributes;
 
-namespace XFEExtension.NetCore.XUnit;
+namespace XFEExtension.NetCore.XUnit.Runtime;
 
 /// <summary>
 /// 表示生成器创建的强类型异步调用适配器。

@@ -2,13 +2,16 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Text.Json;
 using XFEExtension.NetCore.XUnit.Attributes;
+using XFEExtension.NetCore.XUnit.Benchmarking;
+using XFEExtension.NetCore.XUnit.Reporting;
+using XFEExtension.NetCore.XUnit.Runtime;
 
-namespace XFEExtension.NetCore.XUnit;
+namespace XFEExtension.NetCore.XUnit.Execution;
 
 /// <summary>
 /// 提供普通测试和基准的命令行入口、筛选、工作进程编排、报告及退出码映射。
 /// </summary>
-public static class XfeRunner
+public static class XFERunner
 {
     /// <summary>
     /// 表示全部已选择工作成功且未检测到性能回归的退出码。

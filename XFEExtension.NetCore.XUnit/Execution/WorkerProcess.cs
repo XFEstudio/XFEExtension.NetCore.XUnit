@@ -1,7 +1,9 @@
 using System.Diagnostics;
 using System.Reflection;
+using XFEExtension.NetCore.XUnit.Reporting;
+using XFEExtension.NetCore.XUnit.Runtime;
 
-namespace XFEExtension.NetCore.XUnit;
+namespace XFEExtension.NetCore.XUnit.Execution;
 
 internal static class WorkerProcess
 {

@@ -8,6 +8,10 @@ using Microsoft.CodeAnalysis.Text;
 using XFEExtension.NetCore.XUnit.Analyzer.CodeFix;
 using XFEExtension.NetCore.XUnit.Analyzer.Diagnostics;
 using XFEExtension.NetCore.XUnit.Analyzer.Generator;
+using XFEExtension.NetCore.XUnit.Assertions;
+using XFEExtension.NetCore.XUnit.Benchmarking;
+using XFEExtension.NetCore.XUnit.Execution;
+using XFEExtension.NetCore.XUnit.Runtime;
 
 [assembly: XFEExtension.NetCore.XUnit.Attributes.UseExtension(typeof(XFEExtension.NetCore.XUnit.Test.TrackingActivator))]
 
@@ -158,15 +162,15 @@ internal sealed class WorkerProcessTests
     [Test]
     public async Task TerminatesHardTimeoutWorker()
     {
-        var exitCode = await XfeRunner.RunAsync(["--tests", "--explicit", "--filter", nameof(HardTimeoutProbe), "--report", "none"]);
-        Assert.Equal(XfeRunner.TestFailureExitCode, exitCode);
+        var exitCode = await XFERunner.RunAsync(["--tests", "--explicit", "--filter", nameof(HardTimeoutProbe), "--report", "none"]);
+        Assert.Equal(XFERunner.TestFailureExitCode, exitCode);
     }
 
     [Test]
     public async Task ReportsCrashedWorker()
     {
-        var exitCode = await XfeRunner.RunAsync(["--tests", "--explicit", "--filter", nameof(WorkerCrashProbe), "--report", "none"]);
-        Assert.Equal(XfeRunner.WorkerCrashExitCode, exitCode);
+        var exitCode = await XFERunner.RunAsync(["--tests", "--explicit", "--filter", nameof(WorkerCrashProbe), "--report", "none"]);
+        Assert.Equal(XFERunner.WorkerCrashExitCode, exitCode);
     }
 
     [Test]

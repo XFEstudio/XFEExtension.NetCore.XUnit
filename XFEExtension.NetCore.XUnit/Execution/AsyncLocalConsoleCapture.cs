@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace XFEExtension.NetCore.XUnit;
+namespace XFEExtension.NetCore.XUnit.Execution;
 
 internal sealed class AsyncLocalConsoleCapture : TextWriter
 {

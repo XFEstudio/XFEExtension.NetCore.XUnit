@@ -1,9 +1,11 @@
 using System.Diagnostics;
+using XFEExtension.NetCore.XUnit.Assertions;
+using XFEExtension.NetCore.XUnit.Execution;
 
-namespace XFEExtension.NetCore.XUnit;
+namespace XFEExtension.NetCore.XUnit.Compatibility;
 
 /// <summary>
-/// 提供 3.x 源代码迁移所需的旧测试基类和辅助方法；新代码应直接使用 <see cref="XfeRunner"/>、
+/// 提供 3.x 源代码迁移所需的旧测试基类和辅助方法；新代码应直接使用 <see cref="XFERunner"/>、
 /// <see cref="Assert"/> 和 <see cref="Attributes.BenchmarkAttribute"/>。
 /// </summary>
 [Obsolete("Use XfeRunner, Assert and BenchmarkAttribute. XFECode will be removed in XUnit 5.0.")]
@@ -14,7 +16,7 @@ public abstract class XFECode
     /// </summary>
     /// <returns>表示整个运行完成的任务。</returns>
     [Obsolete("Use generated XfeRunner.RunAsync entry points.")]
-    public static async Task RunTest() => Environment.ExitCode = await XfeRunner.RunAsync(Environment.GetCommandLineArgs().Skip(1).ToArray()).ConfigureAwait(false);
+    public static async Task RunTest() => Environment.ExitCode = await XFERunner.RunAsync(Environment.GetCommandLineArgs().Skip(1).ToArray()).ConfigureAwait(false);
 
     /// <summary>
     /// 对委托执行一次墙钟计时；该兼容方法不会校准、预热或统计采样，不能替代正式基准。
@@ -61,7 +63,7 @@ public abstract class XFECode
     [Obsolete("Use Assert.True.")]
     public static bool Assert(bool condition, string? message = null)
     {
-        global::XFEExtension.NetCore.XUnit.Assert.True(condition, message);
+        global::XFEExtension.NetCore.XUnit.Assertions.Assert.True(condition, message);
         return true;
     }
 
@@ -75,7 +77,7 @@ public abstract class XFECode
     [Obsolete("Use Assert.False.")]
     public static bool AssertF(bool condition, string? message = null)
     {
-        global::XFEExtension.NetCore.XUnit.Assert.False(condition, message);
+        global::XFEExtension.NetCore.XUnit.Assertions.Assert.False(condition, message);
         return true;
     }
 
@@ -91,7 +93,7 @@ public abstract class XFECode
     [Obsolete("Use Assert.Equal.")]
     public static bool AssertE<T>(T expected, T actual, string? message = null)
     {
-        global::XFEExtension.NetCore.XUnit.Assert.Equal(expected, actual, message);
+        global::XFEExtension.NetCore.XUnit.Assertions.Assert.Equal(expected, actual, message);
         return true;
     }
 

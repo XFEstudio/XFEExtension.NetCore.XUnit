@@ -1,6 +1,7 @@
 using XFEExtension.NetCore.XUnit.Attributes;
+using XFEExtension.NetCore.XUnit.Runtime;
 
-namespace XFEExtension.NetCore.XUnit;
+namespace XFEExtension.NetCore.XUnit.Benchmarking;
 
 /// <summary>
 /// 执行单个基准描述符的校准、预热、开销测量、实际采样和内存统计流程。

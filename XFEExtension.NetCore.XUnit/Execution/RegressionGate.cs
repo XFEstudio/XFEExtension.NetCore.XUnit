@@ -1,4 +1,6 @@
-namespace XFEExtension.NetCore.XUnit;
+using XFEExtension.NetCore.XUnit.Runtime;
+
+namespace XFEExtension.NetCore.XUnit.Execution;
 
 internal static class RegressionGate
 {

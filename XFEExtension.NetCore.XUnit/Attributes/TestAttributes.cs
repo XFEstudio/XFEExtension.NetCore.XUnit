@@ -37,7 +37,7 @@ public sealed class TestCaseAttribute(params object?[] arguments) : Attribute
 }
 
 /// <summary>
-/// 从静态字段、属性、无参方法或 <see cref="XFEExtension.NetCore.XUnit.ITestCaseDataSource"/> 获取测试数据。
+/// 从静态字段、属性、无参方法或 <see cref="Runtime.ITestCaseDataSource"/> 获取测试数据。
 /// </summary>
 /// <param name="memberName">提供数据的静态成员名称。</param>
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
@@ -191,8 +191,8 @@ public sealed class IsolatedAttribute : Attribute;
 /// 在测试程序集上注册运行时扩展实现。
 /// </summary>
 /// <param name="extensionType">
-/// 实现 <see cref="XFEExtension.NetCore.XUnit.ITestReporter"/>、<see cref="XFEExtension.NetCore.XUnit.IBenchmarkExporter"/>
-/// 或 <see cref="XFEExtension.NetCore.XUnit.ITestActivator"/> 的类型。
+/// 实现 <see cref="Runtime.ITestReporter"/>、<see cref="Runtime.IBenchmarkExporter"/>
+/// 或 <see cref="Runtime.ITestActivator"/> 的类型。
 /// </param>
 [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
 public sealed class UseExtensionAttribute(Type extensionType) : Attribute

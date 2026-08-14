@@ -1,4 +1,6 @@
-namespace XFEExtension.NetCore.XUnit;
+using XFEExtension.NetCore.XUnit.Runtime;
+
+namespace XFEExtension.NetCore.XUnit.Benchmarking;
 
 /// <summary>
 /// 提供基准样本的异常值识别、描述统计、置信区间、预热稳定性和趋势计算。

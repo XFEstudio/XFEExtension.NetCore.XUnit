@@ -1,4 +1,4 @@
-namespace XFEExtension.NetCore.XUnit;
+namespace XFEExtension.NetCore.XUnit.Runtime;
 
 /// <summary>
 /// 表示从配置文件加载并可由命令行覆盖的完整 XFE 运行设置。

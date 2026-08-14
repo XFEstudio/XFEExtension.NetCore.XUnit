@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 
-namespace XFEExtension.NetCore.XUnit;
+namespace XFEExtension.NetCore.XUnit.Assertions;
 
 /// <summary>
 /// 表示 XFE 强类型断言未满足时产生的测试失败。

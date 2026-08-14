@@ -1,4 +1,4 @@
-namespace XFEExtension.NetCore.XUnit;
+namespace XFEExtension.NetCore.XUnit.Runtime;
 
 /// <summary>
 /// 表示普通测试用例的最终执行状态。

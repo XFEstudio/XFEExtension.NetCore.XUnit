@@ -4,8 +4,9 @@ using System.Runtime;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
+using XFEExtension.NetCore.XUnit.Runtime;
 
-namespace XFEExtension.NetCore.XUnit;
+namespace XFEExtension.NetCore.XUnit.Benchmarking;
 
 internal static class EnvironmentInspector
 {

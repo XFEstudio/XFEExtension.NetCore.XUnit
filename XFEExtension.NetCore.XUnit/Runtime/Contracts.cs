@@ -1,4 +1,4 @@
-namespace XFEExtension.NetCore.XUnit;
+namespace XFEExtension.NetCore.XUnit.Runtime;
 
 /// <summary>
 /// 定义普通测试运行完成后的自定义报告扩展。

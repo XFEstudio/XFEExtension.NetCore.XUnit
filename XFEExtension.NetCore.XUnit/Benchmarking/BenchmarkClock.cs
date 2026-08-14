@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace XFEExtension.NetCore.XUnit;
+namespace XFEExtension.NetCore.XUnit.Benchmarking;
 
 /// <summary>
 /// 抽象基准引擎使用的单调高精度时钟，便于替换真实时钟和注入确定性测试时钟。
