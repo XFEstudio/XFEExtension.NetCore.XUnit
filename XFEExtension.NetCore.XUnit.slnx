@@ -1,7 +1,9 @@
 <Solution>
   <Project Path="XFEExtension.NetCore.XUnit.Analyzer/XFEExtension.NetCore.XUnit.Analyzer.csproj" />
+  <Project Path="XFEExtension.NetCore.XUnit.CodeFixes/XFEExtension.NetCore.XUnit.CodeFixes.csproj" />
   <Project Path="XFEExtension.NetCore.XUnit.Test/XFEExtension.NetCore.XUnit.Test.csproj" />
   <Project Path="XFEExtension.NetCore.XUnit/XFEExtension.NetCore.XUnit.csproj">
     <BuildDependency Project="XFEExtension.NetCore.XUnit.Analyzer/XFEExtension.NetCore.XUnit.Analyzer.csproj" />
+    <BuildDependency Project="XFEExtension.NetCore.XUnit.CodeFixes/XFEExtension.NetCore.XUnit.CodeFixes.csproj" />
   </Project>
 </Solution>

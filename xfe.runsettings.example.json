@@ -1,0 +1,29 @@
+{
+  "language": "Auto",
+  "tests": {
+    "parallel": true,
+    "maxParallelism": 8,
+    "failFast": false,
+    "includeExplicit": false,
+    "defaultTimeoutMilliseconds": 0,
+    "seed": null
+  },
+  "benchmark": {
+    "targetIterationMilliseconds": 500,
+    "minWarmupCount": 6,
+    "maxWarmupCount": 50,
+    "minIterationCount": 15,
+    "maxIterationCount": 100,
+    "maxRelativeError": 0.02,
+    "maxLaunchCount": 3,
+    "measureMemory": true,
+    "allowUnsafeEnvironment": false
+  },
+  "reports": {
+    "artifactsPath": "XfeTestArtifacts",
+    "json": true,
+    "jUnit": true,
+    "markdown": true,
+    "csv": true
+  }
+}

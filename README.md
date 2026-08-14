@@ -1,175 +1,92 @@
-# XFEExtension.NetCore.XUnit
+# XFEExtension.NetCore.XUnit 4.0
 
-[![NuGet](https://img.shields.io/nuget/v/XFEExtension.NetCore.XUnit?label=NuGet&logo=NuGet)](https://www.nuget.org/packages/XFEExtension.NetCore.XUnit/)
-[![NuGet Downloads](https://img.shields.io/nuget/dt/XFEExtension.NetCore.XUnit?label=Downloads&logo=NuGet)](https://www.nuget.org/packages/XFEExtension.NetCore.XUnit/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE.txt)
-[![.NET](https://img.shields.io/badge/.NET-10.0-512BD4)](https://dotnet.microsoft.com/download)
+An independent .NET 10 test and statistical benchmark runner. Despite the historical package name, this project is not based on or affiliated with xUnit.net.
 
-> 📖 English | [简体中文](https://github.com/XFEstudio/XFEExtension.NetCore.XUnit/blob/master/README.zh-CN.md)
-
-
-## Description
-
-XFEExtension.NetCore.XUnit is an XUnit-based testing framework that lets you run tests without writing a `Main` method. Simply annotate the classes or methods you want to test with the provided attributes.
-
-## Examples
-
-### Quick parameterless test cases (CTest & MTest)
+## Tests
 
 ```csharp
-[CTest]
-//[CTest]
-// Multiple test cases can be added
-public class TestClass
+[TestFixture]
+public class CalculatorTests
 {
-    [MTest]
-    //[MTest]
-    //[MTest]
-    // Multiple test cases can be added
-    public void TestMethod()
-    {
-        Console.WriteLine("Hello World!");
-    }
+    [BeforeEach]
+    public void SetUp() { }
+
+    [TestCase(1, 2, 3)]
+    [TestCase(2, 3, 5)]
+    public void Adds(int left, int right, int expected)
+        => Assert.Equal(expected, left + right);
+
+    [Test]
+    public async Task CompletesAsync()
+        => await Task.Delay(1);
 }
 ```
 
----
+The incremental source generator discovers tests at build time, emits strongly typed invokers, and generates an entry point when the project does not already have one. `async void` tests are rejected because no runner can await their completion reliably.
 
-### Test cases with parameters
+Run tests directly:
+
+```text
+dotnet run -c Release
+dotnet run -c Release -- --filter Calculator --category Unit
+```
+
+Different classes run in parallel by default while methods in one class remain serial. Use `[Collection]`, `[NonParallel]`, `[Timeout]`, and `[Isolated]` for shared resources and process isolation. Results are exported as console output, JSON, and JUnit XML.
+
+The console automatically selects Simplified Chinese when the current UI culture is Chinese and otherwise falls back to English. Override it at any time with `--language en`, `--language zh`, or `--language auto`. The adaptive interface includes a two-column run card, encoding-safe status badges, aligned test durations, hierarchical failure details, success-rate and slow-test summaries, benchmark environment information, convergence warnings, and a detailed benchmark table. Redirected output remains plain text and honors `NO_COLOR`.
+
+## Benchmarks
 
 ```csharp
-[CTest]
-public class TestClass
+public class ParserBenchmarks
 {
-    [MTest(1, 2)]
-    [MTest(2, 3)]
-    [MTest(3, 4)]
-    public void TestMethod(int a, int b)
-    {
-        Console.WriteLine(a + b);
-    }
+    [Params(10, 100)]
+    public int Count { get; set; }
+
+    [Benchmark(Baseline = true)]
+    public int Baseline() => Enumerable.Range(0, Count).Sum();
+
+    [Benchmark]
+    public int Candidate() => Enumerable.Range(0, Count).Aggregate(0, (sum, value) => sum + value);
 }
 ```
 
----
+Benchmarks are opt-in and must be run from an optimized Release build:
 
-### Assertions (via inheritance)
+```text
+dotnet run -c Release -- --benchmarks
+dotnet run -c Release -- --benchmarks --quick
+```
 
-```csharp
-[CTest]
-public class TestClass : XFECode
+The balanced job pilots invocation count, targets approximately 500 ms iterations, performs 6–50 warmups and 15–100 measurements, calibrates a return-shape-compatible empty workload, and stops at an approximately 2% relative error target using a 99.9% confidence interval. Raw samples, outliers, allocation, and GC counts are retained in JSON; Markdown and CSV summaries are also produced. Results below measurable infrastructure overhead are reported as such rather than presented as precise single-operation timings.
+
+Performance gating is explicit:
+
+```text
+dotnet run -c Release -- --benchmarks --baseline previous/benchmark-results.json --max-regression 0.05
+```
+
+## Configuration
+
+Project defaults may be stored in `xfe.runsettings.json`. Precedence is CLI, method/class/assembly attributes, configuration file, then built-in defaults.
+
+```json
 {
-    [MTest(1, 2)]
-    [MTest(2, 3)]
-    public void TestMethod(int a, int b)
-    {
-        Assert(a + b == 3, "Not equal to 3");
-    }
+  "language": "Auto",
+  "tests": { "parallel": true, "maxParallelism": 8 },
+  "benchmark": { "targetIterationMilliseconds": 500, "maxRelativeError": 0.02 },
+  "reports": { "artifactsPath": "XfeTestArtifacts" }
 }
 ```
 
----
+Useful commands include `--tests`, `--benchmarks`, `--all`, `--list`, `--filter`, `--category`, `--parallel`, `--no-parallel`, `--fail-fast`, `--explicit`, `--language`, `--artifacts`, `--baseline`, `--max-regression`, and `--help`.
 
-### Assertions (without inheritance)
+## Extensions
 
-```csharp
-[CTest]
-public class TestClass
-{
-    [MTest(1, 2)]
-    [MTest(2, 3)]
-    public void TestMethod(int a, int b)
-    {
-        XFECode.Assert(a + b == 3, "Not equal to 3");
-    }
-}
-```
+Register one or more assembly-level `[UseExtension(typeof(...))]` attributes to add an `ITestReporter`, `IBenchmarkExporter`, or a single `ITestActivator`. A `[MemberData]` member may return either an enumerable of rows or an `ITestCaseDataSource`. The activator owns test/fixture creation and asynchronous disposal for the run.
 
----
+The analyzer rejects `async void` and invalid lifecycle signatures. Migration diagnostics for the 3.x attributes include code fixes; the code-fix assembly is kept separate from the command-line analyzer/generator so Release builds do not acquire a Roslyn Workspaces dependency.
 
-### Verify return value equality (MRTest)
+## Migrating from 3.x
 
-```csharp
-[CTest]
-public class TestClass
-{
-    [MRTest(1, 2, 3)]
-    [MRTest(2, 3, 5)]
-    [MRTest(3, 4, 7)]
-    public int TestMethod(int a, int b)
-    {
-        return a + b;
-    }
-}
-```
-
----
-
-### Add descriptions to test cases (CNTest & MNTest)
-
-```csharp
-[CTest("This is a test class")]
-public class TestClass
-{
-    [MNTest("This is a test method")]
-    public void TestMethod()
-    {
-        Console.WriteLine("Hello World!");
-    }
-}
-```
-
----
-
-### Add description and return-value comparison together (MNRTest)
-
-```csharp
-[CTest("This is a test class")]
-public class TestClass
-{
-    [MNRTest("This is a test method", 1, 2, 3)]
-    public int TestMethod(int a, int b)
-    {
-        return a + b;
-    }
-}
-```
-
----
-
-### Set an initialization method for the test class (SetUp)
-
-```csharp
-[CTest]
-public class TestClass
-{
-    string initWord;
-
-    [SetUp]
-    public void SetUp()
-    {
-        initWord = "Hello World!";
-    }
-
-    [MTest]
-    public void TestMethod()
-    {
-        Console.WriteLine(initWord);
-    }
-}
-```
-
----
-
-### Test static methods directly (SMTest)
-
-```csharp
-public class TestClass
-{
-    [SMTest]
-    public static void TestMethod()
-    {
-        Console.WriteLine("Hello World!");
-    }
-}
-```
+`CTest`, `MTest`, `MRTest`, `SMTest`, `SetUp`, and `XFECode` remain source-compatible for the 4.x line and are marked obsolete. Migrate to `TestFixture`, `Test`, `TestCase`, `Benchmark`, `BeforeEach`, and `Assert`. Legacy timing attributes are treated as benchmarks and therefore run only with `--benchmarks`. The compatibility surface will be removed in 5.0.
