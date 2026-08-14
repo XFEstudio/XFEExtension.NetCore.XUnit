@@ -24,7 +24,7 @@ public sealed class XUnitCodeGenerator : IIncrementalGenerator
 
     private static readonly DiagnosticDescriptor ExistingEntryPoint = new(
         "XFE1002", "XFE entry point was not generated",
-        "The project already has an entry point; call await XfeRunner.RunAsync(args) from it",
+        "The project already has an entry point; call await XFERunner.RunAsync(args) from it",
         "XFEExtension.NetCore.XUnit.Generator", DiagnosticSeverity.Info, true);
 
     private static readonly DiagnosticDescriptor InvalidArguments = new(
@@ -95,10 +95,10 @@ public sealed class XUnitCodeGenerator : IIncrementalGenerator
         source.AppendLine("internal static class XfeGeneratedTestRegistry");
         source.AppendLine("{");
         source.AppendLine("    [global::System.Runtime.CompilerServices.ModuleInitializer]");
-        source.AppendLine("    internal static void Initialize() => global::XFEExtension.NetCore.XUnit.XfeGeneratedRegistry.SetFactory(Create);");
-        source.AppendLine("    internal static global::XFEExtension.NetCore.XUnit.XfeRegistry Create()");
+        source.AppendLine("    internal static void Initialize() => global::XFEExtension.NetCore.XUnit.Runtime.XfeGeneratedRegistry.SetFactory(Create);");
+        source.AppendLine("    internal static global::XFEExtension.NetCore.XUnit.Runtime.XfeRegistry Create()");
         source.AppendLine("    {");
-        source.AppendLine("        var registry = new global::XFEExtension.NetCore.XUnit.XfeRegistry();");
+        source.AppendLine("        var registry = new global::XFEExtension.NetCore.XUnit.Runtime.XfeRegistry();");
         source.Append(registrations);
         source.AppendLine("        return registry;");
         source.AppendLine("    }");
@@ -116,7 +116,7 @@ public sealed class XUnitCodeGenerator : IIncrementalGenerator
             context.AddSource("XfeEntryPoint.g.cs", SourceText.From(
                 "namespace XFEExtension.NetCore.XUnit.Generated;\n" +
                 "internal static class XfeEntryPoint\n{\n" +
-                "    public static global::System.Threading.Tasks.Task<int> Main(string[] args) => global::XFEExtension.NetCore.XUnit.XfeRunner.RunAsync(args);\n" +
+                "    public static global::System.Threading.Tasks.Task<int> Main(string[] args) => global::XFEExtension.NetCore.XUnit.Execution.XFERunner.RunAsync(args);\n" +
                 "}\n", Encoding.UTF8));
         }
         else
@@ -195,9 +195,9 @@ public sealed class XUnitCodeGenerator : IIncrementalGenerator
         var index = 0;
 
         if (test is not null && testCases.Length == 0 && memberData.Length == 0)
-            AppendTest(output, method, wrapper, lifecycle, "[]", index++, GetNamedString(test, "Name"), false, false, "null", "static () => global::XFEExtension.NetCore.XUnit.XfeObjectFactory.Create(typeof(" + TypeName(method.ContainingType) + "), [])");
+            AppendTest(output, method, wrapper, lifecycle, "[]", index++, GetNamedString(test, "Name"), false, false, "null", "static () => global::XFEExtension.NetCore.XUnit.Runtime.XfeObjectFactory.Create(typeof(" + TypeName(method.ContainingType) + "), [])");
         foreach (var attribute in testCases)
-            AppendTest(output, method, wrapper, lifecycle, ArrayExpression(GetArrayArgument(attribute, 0)), index++, GetNamedString(attribute, "Name"), false, false, "null", "static () => global::XFEExtension.NetCore.XUnit.XfeObjectFactory.Create(typeof(" + TypeName(method.ContainingType) + "), [])");
+            AppendTest(output, method, wrapper, lifecycle, ArrayExpression(GetArrayArgument(attribute, 0)), index++, GetNamedString(attribute, "Name"), false, false, "null", "static () => global::XFEExtension.NetCore.XUnit.Runtime.XfeObjectFactory.Create(typeof(" + TypeName(method.ContainingType) + "), [])");
 
         foreach (var attribute in memberData)
         {
@@ -206,10 +206,10 @@ public sealed class XUnitCodeGenerator : IIncrementalGenerator
                 continue;
             var sourceType = attribute.NamedArguments.FirstOrDefault(static pair => pair.Key == "MemberType").Value.Value as INamedTypeSymbol ?? method.ContainingType;
             var prefix = Escape(Id(method, index++));
-            output.Append("        { var dataIndex = 0; foreach (var data in global::XFEExtension.NetCore.XUnit.XfeMemberData.Get(typeof(")
+            output.Append("        { var dataIndex = 0; foreach (var data in global::XFEExtension.NetCore.XUnit.Runtime.XfeMemberData.Get(typeof(")
                 .Append(TypeName(sourceType)).Append("), ").Append(Escape(memberName)).AppendLine(")) {");
             AppendTest(output, method, wrapper, lifecycle, "data", 0, null, false, false, "null",
-                "static () => global::XFEExtension.NetCore.XUnit.XfeObjectFactory.Create(typeof(" + TypeName(method.ContainingType) + "), [])", prefix + " + \"-\" + dataIndex",
+                "static () => global::XFEExtension.NetCore.XUnit.Runtime.XfeObjectFactory.Create(typeof(" + TypeName(method.ContainingType) + "), [])", prefix + " + \"-\" + dataIndex",
                 Escape(method.ContainingType.Name + "." + method.Name + "[") + " + dataIndex + \"]\"", 12);
             output.AppendLine("            dataIndex++;");
             output.AppendLine("        } }");
@@ -222,7 +222,7 @@ public sealed class XUnitCodeGenerator : IIncrementalGenerator
             {
                 var arguments = GetLegacyArguments(attribute, false, out var expected, out var hasExpected, out var name);
                 var constructorArguments = GetArrayArgument(classCase, classCase.AttributeClass?.Name == "CNTestAttribute" ? 1 : 0);
-                var factory = "static () => global::XFEExtension.NetCore.XUnit.XfeObjectFactory.Create(typeof(" + TypeName(method.ContainingType) + "), " + ArrayExpression(constructorArguments) + ")";
+                var factory = "static () => global::XFEExtension.NetCore.XUnit.Runtime.XfeObjectFactory.Create(typeof(" + TypeName(method.ContainingType) + "), " + ArrayExpression(constructorArguments) + ")";
                 AppendTest(output, method, wrapper, lifecycle, ArrayExpression(arguments), index++, name, true, hasExpected, expected, factory);
             }
         }
@@ -233,7 +233,7 @@ public sealed class XUnitCodeGenerator : IIncrementalGenerator
     {
         var spaces = new string(' ', indent);
         var id = customId ?? Escape(Id(method, index));
-        output.Append(spaces).AppendLine("registry.AddTest(new global::XFEExtension.NetCore.XUnit.TestDescriptor");
+        output.Append(spaces).AppendLine("registry.AddTest(new global::XFEExtension.NetCore.XUnit.Runtime.TestDescriptor");
         output.Append(spaces).AppendLine("{");
         output.Append(spaces).Append("    Id = ").Append(id).AppendLine(",");
         var display = customDisplay ?? Escape(name ?? method.ContainingType.Name + "." + method.Name + (arguments == "[]" ? string.Empty : "#" + index));
@@ -278,7 +278,7 @@ public sealed class XUnitCodeGenerator : IIncrementalGenerator
             var displayName = GetNamedString(benchmark, "Name") ?? legacyName ?? method.ContainingType.Name + "." + method.Name;
             if (parameters.Count > 0)
                 displayName += "(" + string.Join(", ", parameters.Select(static pair => pair.Key + "=" + pair.Value.DisplayValue)) + ")";
-            output.AppendLine("        registry.AddBenchmark(new global::XFEExtension.NetCore.XUnit.BenchmarkDescriptor");
+            output.AppendLine("        registry.AddBenchmark(new global::XFEExtension.NetCore.XUnit.Runtime.BenchmarkDescriptor");
             output.AppendLine("        {");
             output.Append("            Id = ").Append(Escape(Id(method, caseIndex))).AppendLine(",");
             output.Append("            DisplayName = ").Append(Escape(displayName)).AppendLine(",");
@@ -290,12 +290,12 @@ public sealed class XUnitCodeGenerator : IIncrementalGenerator
             output.Append("            Strategy = (global::XFEExtension.NetCore.XUnit.Attributes.BenchmarkStrategy)").Append(GetNamedInt(benchmark, "Strategy")).AppendLine(",");
             output.Append("            IsLegacy = ").Append(benchmark is null ? "true" : "false").AppendLine(",");
             output.Append("            ParameterKey = ").Append(Escape(string.Join(";", parameters.Select(static pair => pair.Key + "=" + pair.Value.DisplayValue)))).AppendLine(",");
-            output.Append("            Factory = static () => global::XFEExtension.NetCore.XUnit.XfeObjectFactory.Create(typeof(").Append(TypeName(method.ContainingType)).AppendLine("), []),");
+            output.Append("            Factory = static () => global::XFEExtension.NetCore.XUnit.Runtime.XfeObjectFactory.Create(typeof(").Append(TypeName(method.ContainingType)).AppendLine("), []),");
             output.Append("            Invoker = ").Append(wrapper).AppendLine(",");
             output.Append("            OverheadInvoker = ").Append(overheadWrapper).AppendLine(",");
             output.Append("            ApplyParameters = static instance => {");
             foreach (var parameter in parameters)
-                output.Append(" global::XFEExtension.NetCore.XUnit.XfeParameterBinder.Set(instance, ").Append(Escape(parameter.Key)).Append(", ").Append(parameter.Value.Expression).Append(");");
+                output.Append(" global::XFEExtension.NetCore.XUnit.Runtime.XfeParameterBinder.Set(instance, ").Append(Escape(parameter.Key)).Append(", ").Append(parameter.Value.Expression).Append(");");
             output.AppendLine(" },");
             output.Append("            Lifecycle = ").Append(lifecycle).AppendLine();
             output.AppendLine("        });");
@@ -319,10 +319,10 @@ public sealed class XUnitCodeGenerator : IIncrementalGenerator
                 }
                 names.Add(wrapper(method));
             }
-            return "new global::XFEExtension.NetCore.XUnit.XfeInvoker[] { " + string.Join(", ", names) + " }";
+            return "new global::XFEExtension.NetCore.XUnit.Runtime.XfeInvoker[] { " + string.Join(", ", names) + " }";
         }
 
-        return "new global::XFEExtension.NetCore.XUnit.XfeLifecycleHooks { " +
+        return "new global::XFEExtension.NetCore.XUnit.Runtime.XfeLifecycleHooks { " +
             "BeforeAll = " + List("BeforeAllAttribute", true) + ", " +
             "AfterAll = " + List("AfterAllAttribute", true) + ", " +
             "BeforeEach = " + MergeLists(List("BeforeEachAttribute", false), List("SetUpAttribute", false)) + ", " +
@@ -338,7 +338,7 @@ public sealed class XUnitCodeGenerator : IIncrementalGenerator
         var leftItems = left.Substring(left.IndexOf('{') + 1).TrimEnd(' ', '}');
         var rightItems = right.Substring(right.IndexOf('{') + 1).TrimEnd(' ', '}');
         var values = new[] { leftItems, rightItems }.Where(static value => !string.IsNullOrWhiteSpace(value));
-        return "new global::XFEExtension.NetCore.XUnit.XfeInvoker[] { " + string.Join(", ", values) + " }";
+        return "new global::XFEExtension.NetCore.XUnit.Runtime.XfeInvoker[] { " + string.Join(", ", values) + " }";
     }
 
     private static string BuildWrapper(IMethodSymbol method, string name)

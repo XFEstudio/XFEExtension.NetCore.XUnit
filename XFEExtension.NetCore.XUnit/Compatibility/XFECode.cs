@@ -8,14 +8,14 @@ namespace XFEExtension.NetCore.XUnit.Compatibility;
 /// 提供 3.x 源代码迁移所需的旧测试基类和辅助方法；新代码应直接使用 <see cref="XFERunner"/>、
 /// <see cref="Assert"/> 和 <see cref="Attributes.BenchmarkAttribute"/>。
 /// </summary>
-[Obsolete("Use XfeRunner, Assert and BenchmarkAttribute. XFECode will be removed in XUnit 5.0.")]
+[Obsolete("Use XFERunner, Assert and BenchmarkAttribute. XFECode will be removed in XUnit 5.0.")]
 public abstract class XFECode
 {
     /// <summary>
     /// 使用当前进程命令行参数运行生成注册表中的测试，并把结果写入 <see cref="Environment.ExitCode"/>。
     /// </summary>
     /// <returns>表示整个运行完成的任务。</returns>
-    [Obsolete("Use generated XfeRunner.RunAsync entry points.")]
+    [Obsolete("Use generated XFERunner.RunAsync entry points.")]
     public static async Task RunTest() => Environment.ExitCode = await XFERunner.RunAsync(Environment.GetCommandLineArgs().Skip(1).ToArray()).ConfigureAwait(false);
 
     /// <summary>
@@ -59,7 +59,7 @@ public abstract class XFECode
     /// <param name="condition">要验证的条件。</param>
     /// <param name="message">失败时使用的可选消息。</param>
     /// <returns>断言成功时始终返回 <see langword="true"/>。</returns>
-    /// <exception cref="XfeAssertionException"><paramref name="condition"/> 为 <see langword="false"/>。</exception>
+    /// <exception cref="XFEAssertionException"><paramref name="condition"/> 为 <see langword="false"/>。</exception>
     [Obsolete("Use Assert.True.")]
     public static bool Assert(bool condition, string? message = null)
     {
@@ -73,7 +73,7 @@ public abstract class XFECode
     /// <param name="condition">要验证的条件。</param>
     /// <param name="message">失败时使用的可选消息。</param>
     /// <returns>断言成功时始终返回 <see langword="true"/>。</returns>
-    /// <exception cref="XfeAssertionException"><paramref name="condition"/> 为 <see langword="true"/>。</exception>
+    /// <exception cref="XFEAssertionException"><paramref name="condition"/> 为 <see langword="true"/>。</exception>
     [Obsolete("Use Assert.False.")]
     public static bool AssertF(bool condition, string? message = null)
     {
@@ -89,7 +89,7 @@ public abstract class XFECode
     /// <param name="actual">实际值。</param>
     /// <param name="message">失败时使用的可选消息。</param>
     /// <returns>断言成功时始终返回 <see langword="true"/>。</returns>
-    /// <exception cref="XfeAssertionException">两个值不相等。</exception>
+    /// <exception cref="XFEAssertionException">两个值不相等。</exception>
     [Obsolete("Use Assert.Equal.")]
     public static bool AssertE<T>(T expected, T actual, string? message = null)
     {

@@ -6,6 +6,11 @@ namespace XFEExtension.NetCore.XUnit.Runtime;
 public sealed class XfeRunSettings
 {
     /// <summary>
+    /// 获取或设置命令行界面的语言；自动模式在无法识别为中文时使用英文。
+    /// </summary>
+    public ConsoleLanguage Language { get; set; } = ConsoleLanguage.Auto;
+
+    /// <summary>
     /// 获取普通测试的调度和行为设置。
     /// </summary>
     public TestRunSettings Tests { get; init; } = new();

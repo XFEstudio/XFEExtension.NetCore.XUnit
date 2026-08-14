@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Runtime.ExceptionServices;
+using XFEExtension.NetCore.XUnit.Assertions;
 using XFEExtension.NetCore.XUnit.Benchmarking;
 using XFEExtension.NetCore.XUnit.Runtime;
 
@@ -136,7 +137,7 @@ internal sealed class TestExecutor
                 bodyWatch.Stop();
                 bodyDuration = bodyWatch.Elapsed;
                 if (test.HasExpectedResult && !Equals(test.ExpectedResult, result))
-                    throw new XfeAssertionException($"Expected return value {test.ExpectedResult ?? "<null>"}, but found {result ?? "<null>"}.");
+                    throw new XFEAssertionException($"Expected return value {test.ExpectedResult ?? "<null>"}, but found {result ?? "<null>"}.");
                 if (!test.IsLegacy)
                 {
                     afterEachAttempted = true;

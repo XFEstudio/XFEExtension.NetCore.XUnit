@@ -31,6 +31,8 @@ dotnet run -c Release -- --filter Calculator --category Unit
 
 默认情况下，不同测试类并行、同一类内串行。可通过 `[Collection]`、`[NonParallel]`、`[Timeout]` 和 `[Isolated]` 管理共享资源及子进程隔离。结果会导出到控制台、JSON 和 JUnit XML。
 
+控制台会根据当前用户界面区域自动识别语言：中文区域使用简体中文，其他及无法识别的区域默认使用英文。可随时通过 `--language en`、`--language zh` 或 `--language auto` 手动覆盖。新版控制台提供运行信息、彩色状态、失败详情、对齐的基准表格、环境信息、收敛警告和汇总；重定向时保持纯文本，并支持 `NO_COLOR`。
+
 ## 性能基准
 
 ```csharp
@@ -68,11 +70,14 @@ dotnet run -c Release -- --benchmarks --baseline previous/benchmark-results.json
 
 ```json
 {
+  "language": "Auto",
   "tests": { "parallel": true, "maxParallelism": 8 },
   "benchmark": { "targetIterationMilliseconds": 500, "maxRelativeError": 0.02 },
   "reports": { "artifactsPath": "XfeTestArtifacts" }
 }
 ```
+
+常用命令包括 `--tests`、`--benchmarks`、`--all`、`--list`、`--filter`、`--category`、`--parallel`、`--no-parallel`、`--fail-fast`、`--explicit`、`--language`、`--artifacts`、`--baseline`、`--max-regression` 和 `--help`。
 
 ## 扩展点
 

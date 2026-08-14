@@ -33,6 +33,8 @@ dotnet run -c Release -- --filter Calculator --category Unit
 
 Different classes run in parallel by default while methods in one class remain serial. Use `[Collection]`, `[NonParallel]`, `[Timeout]`, and `[Isolated]` for shared resources and process isolation. Results are exported as console output, JSON, and JUnit XML.
 
+The console automatically selects Simplified Chinese when the current UI culture is Chinese and otherwise falls back to English. Override it at any time with `--language en`, `--language zh`, or `--language auto`. The console includes a run header, colored status lines, failure details, an aligned benchmark table, environment information, convergence warnings, and a compact summary; redirected output remains plain text and honors `NO_COLOR`.
+
 ## Benchmarks
 
 ```csharp
@@ -70,13 +72,14 @@ Project defaults may be stored in `xfe.runsettings.json`. Precedence is CLI, met
 
 ```json
 {
+  "language": "Auto",
   "tests": { "parallel": true, "maxParallelism": 8 },
   "benchmark": { "targetIterationMilliseconds": 500, "maxRelativeError": 0.02 },
   "reports": { "artifactsPath": "XfeTestArtifacts" }
 }
 ```
 
-Useful commands include `--tests`, `--benchmarks`, `--all`, `--list`, `--filter`, `--category`, `--parallel`, `--no-parallel`, `--fail-fast`, `--explicit`, `--artifacts`, `--baseline`, and `--max-regression`.
+Useful commands include `--tests`, `--benchmarks`, `--all`, `--list`, `--filter`, `--category`, `--parallel`, `--no-parallel`, `--fail-fast`, `--explicit`, `--language`, `--artifacts`, `--baseline`, `--max-regression`, and `--help`.
 
 ## Extensions
 

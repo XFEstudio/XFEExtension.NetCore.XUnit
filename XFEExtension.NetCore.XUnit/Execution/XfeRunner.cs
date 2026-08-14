@@ -11,7 +11,7 @@ namespace XFEExtension.NetCore.XUnit.Execution;
 /// <summary>
 /// 提供普通测试和基准的命令行入口、筛选、工作进程编排、报告及退出码映射。
 /// </summary>
-public static class XFERunner
+public static partial class XFERunner
 {
     /// <summary>
     /// 表示全部已选择工作成功且未检测到性能回归的退出码。
@@ -56,17 +56,29 @@ public static class XFERunner
     /// <returns>表示运行完成的任务；结果为 <see cref="SuccessExitCode"/> 等标准退出码之一。</returns>
     public static async Task<int> RunAsync(string[] args, XfeRegistry registry, CancellationToken cancellationToken = default)
     {
+        var presenter = new ConsolePresenter(new ConsoleLocalizer(ConsoleLanguage.Auto));
         try
         {
             var options = RunnerOptions.Parse(args);
+            presenter = new ConsolePresenter(new ConsoleLocalizer(options.Language ?? ConsoleLanguage.Auto));
             if (options.Error is not null)
             {
-                Console.Error.WriteLine(options.Error);
+                presenter.PrintError(options.GetError(options.Language ?? ConsoleLanguage.Auto));
                 return ConfigurationErrorExitCode;
+            }
+            if (options.ShowHelp)
+            {
+                presenter.PrintHelp();
+                return SuccessExitCode;
+            }
+            if (options.ShowVersion)
+            {
+                presenter.PrintVersion();
+                return SuccessExitCode;
             }
             var activators = LoadExtensions<ITestActivator>().ToArray();
             if (activators.Length > 1)
-                throw new XfeConfigurationException("Only one ITestActivator extension can be registered per test assembly.");
+                throw new XFEConfigurationException("Only one ITestActivator extension can be registered per test assembly.");
             using var activatorScope = XfeObjectFactory.UseActivator(activators.SingleOrDefault());
             if (options.WorkerTestId is not null)
                 return await RunTestWorkerAsync(options, registry, cancellationToken).ConfigureAwait(false);
@@ -75,14 +87,13 @@ public static class XFERunner
 
             var settings = await LoadSettingsAsync(options.SettingsPath, cancellationToken).ConfigureAwait(false);
             options.Apply(settings);
+            presenter = new ConsolePresenter(new ConsoleLocalizer(settings.Language));
             var tests = FilterTests(registry.Tests, options).ToArray();
             var benchmarks = FilterBenchmarks(registry.Benchmarks, options).ToArray();
+            presenter.PrintHeader(options.ListOnly || options.RunTests, options.ListOnly || options.RunBenchmarks, tests.Length, benchmarks.Length, settings);
             if (options.ListOnly)
             {
-                foreach (var test in tests)
-                    Console.WriteLine($"test\t{test.Id}\t{test.DisplayName}");
-                foreach (var benchmark in benchmarks)
-                    Console.WriteLine($"benchmark\t{benchmark.Id}\t{benchmark.DisplayName}");
+                presenter.PrintList(tests, benchmarks);
                 return SuccessExitCode;
             }
 
@@ -99,7 +110,7 @@ public static class XFERunner
                 if (options.RunTests)
                 {
                     var testSummary = await RunTestsAsync(tests, settings, cancelSource.Token).ConfigureAwait(false);
-                    PrintTests(testSummary);
+                    presenter.PrintTests(testSummary);
                     await BuiltInReporters.WriteTestsAsync(testSummary, settings.Reports, cancelSource.Token).ConfigureAwait(false);
                     foreach (var reporter in LoadExtensions<ITestReporter>())
                         await reporter.ReportAsync(testSummary, settings.Reports.ArtifactsPath, cancelSource.Token).ConfigureAwait(false);
@@ -110,14 +121,16 @@ public static class XFERunner
                 }
                 if (options.RunBenchmarks)
                 {
-                    var benchmarkSummary = await RunBenchmarksAsync(benchmarks, settings, options, cancelSource.Token).ConfigureAwait(false);
-                    PrintBenchmarks(benchmarkSummary);
+                    var benchmarkSummary = await RunBenchmarksAsync(benchmarks, settings, options, presenter, cancelSource.Token).ConfigureAwait(false);
+                    presenter.PrintBenchmarks(benchmarkSummary);
                     await BuiltInReporters.WriteBenchmarksAsync(benchmarkSummary, settings.Reports, cancelSource.Token).ConfigureAwait(false);
                     foreach (var exporter in LoadExtensions<IBenchmarkExporter>())
                         await exporter.ExportAsync(benchmarkSummary, settings.Reports.ArtifactsPath, cancelSource.Token).ConfigureAwait(false);
                     if (benchmarkSummary.RegressionDetected && exitCode == SuccessExitCode)
                         exitCode = TestFailureExitCode;
                 }
+                if (settings.Reports.Json || settings.Reports.JUnit || settings.Reports.Markdown || settings.Reports.Csv)
+                    presenter.PrintArtifacts(settings.Reports.ArtifactsPath);
                 return exitCode;
             }
             finally
@@ -127,22 +140,22 @@ public static class XFERunner
         }
         catch (OperationCanceledException)
         {
-            Console.Error.WriteLine("Run cancelled.");
+            presenter.PrintCancellation();
             return CancelledExitCode;
         }
-        catch (XfeConfigurationException exception)
+        catch (XFEConfigurationException exception)
         {
-            Console.Error.WriteLine(exception.Message);
+            presenter.PrintError(exception.Message);
             return ConfigurationErrorExitCode;
         }
         catch (JsonException exception)
         {
-            Console.Error.WriteLine(exception.Message);
+            presenter.PrintError(exception.Message);
             return ConfigurationErrorExitCode;
         }
         catch (Exception exception)
         {
-            Console.Error.WriteLine(exception);
+            presenter.PrintError(exception.ToString());
             return WorkerCrashExitCode;
         }
     }
@@ -182,7 +195,7 @@ public static class XFERunner
         }
     }
 
-    private static async Task<BenchmarkRunSummary> RunBenchmarksAsync(BenchmarkDescriptor[] benchmarks, XfeRunSettings settings, RunnerOptions options, CancellationToken cancellationToken)
+    private static async Task<BenchmarkRunSummary> RunBenchmarksAsync(BenchmarkDescriptor[] benchmarks, XfeRunSettings settings, RunnerOptions options, ConsolePresenter presenter, CancellationToken cancellationToken)
     {
         var started = DateTimeOffset.UtcNow;
         var watch = Stopwatch.StartNew();
@@ -223,16 +236,16 @@ public static class XFERunner
         if (options.BaselinePath is not null)
         {
             if (!File.Exists(options.BaselinePath))
-                throw new XfeConfigurationException($"Benchmark baseline file was not found: {options.BaselinePath}");
+                throw new XFEConfigurationException($"Benchmark baseline file was not found: {options.BaselinePath}");
             var baseline = BuiltInReporters.Deserialize<BenchmarkRunSummary>(await File.ReadAllTextAsync(options.BaselinePath, cancellationToken).ConfigureAwait(false));
             if (baseline is null)
-                throw new XfeConfigurationException("The benchmark baseline file is invalid.");
+                throw new XFEConfigurationException("The benchmark baseline file is invalid.");
             var errors = new List<string>();
             regression = RegressionGate.Apply(summaries, baseline, options.MaxRegression, options.AllowEnvironmentMismatch, errors);
             foreach (var error in errors)
-                Console.Error.WriteLine(error);
+                presenter.PrintError(error);
             if (errors.Count > 0 && !options.AllowEnvironmentMismatch)
-                throw new XfeConfigurationException("Benchmark regression gating was refused because the environments differ.");
+                throw new XFEConfigurationException("Benchmark regression gating was refused because the environments differ.");
         }
         watch.Stop();
         return new BenchmarkRunSummary { StartedAt = started, Duration = watch.Elapsed, Benchmarks = summaries, RegressionDetected = regression };
@@ -341,42 +354,14 @@ public static class XFERunner
     {
         var path = explicitPath ?? Path.Combine(Environment.CurrentDirectory, "xfe.runsettings.json");
         if (!File.Exists(path))
+        {
+            if (explicitPath is not null)
+                throw new XFEConfigurationException($"Run settings file was not found: {path}");
             return new XfeRunSettings();
+        }
         var settings = JsonSerializer.Deserialize<XfeRunSettings>(await File.ReadAllTextAsync(path, cancellationToken).ConfigureAwait(false),
             new JsonSerializerOptions(JsonSerializerDefaults.Web) { PropertyNameCaseInsensitive = true });
         return settings ?? new XfeRunSettings();
-    }
-
-    private static void PrintTests(TestRunSummary summary)
-    {
-        foreach (var result in summary.Results)
-        {
-            var original = Console.ForegroundColor;
-            Console.ForegroundColor = result.Outcome switch
-            {
-                TestOutcome.Passed => ConsoleColor.Green,
-                TestOutcome.Skipped => ConsoleColor.Yellow,
-                _ => ConsoleColor.Red
-            };
-            Console.WriteLine($"[{result.Outcome}] {result.DisplayName} ({result.TotalDuration.TotalMilliseconds:F3} ms)");
-            Console.ForegroundColor = original;
-            if (result.Message is not null)
-                Console.WriteLine($"  {result.Message}");
-        }
-        Console.WriteLine($"Total: {summary.Total}, Passed: {summary.Passed}, Failed: {summary.Failed}, Skipped: {summary.Skipped}, Duration: {summary.Duration.TotalSeconds:F3}s");
-    }
-
-    private static void PrintBenchmarks(BenchmarkRunSummary summary)
-    {
-        Console.WriteLine("Benchmark\tMean\tError\tMedian\tAllocated/op\tRatio");
-        foreach (var benchmark in summary.Benchmarks)
-        {
-            Console.WriteLine($"{benchmark.DisplayName}\t{BuiltInReporters.FormatNanoseconds(benchmark.Statistics.MeanNanoseconds)}\t" +
-                $"{BuiltInReporters.FormatNanoseconds(benchmark.Statistics.ErrorNanoseconds)}\t{BuiltInReporters.FormatNanoseconds(benchmark.Statistics.MedianNanoseconds)}\t" +
-                $"{benchmark.Gc.AllocatedBytesPerOperation:F2} B\t{benchmark.BaselineRatio?.ToString("F3") ?? "-"}");
-            foreach (var warning in benchmark.Warnings)
-                Console.WriteLine($"  warning: {warning}");
-        }
     }
 
     private sealed class RunnerOptions
@@ -402,26 +387,40 @@ public static class XFERunner
         public bool AllowUnsafeBenchmark { get; private set; }
         public int? Seed { get; private set; }
         public string? ReportFormats { get; private set; }
+        public ConsoleLanguage? Language { get; private set; }
+        public bool ShowHelp { get; private set; }
+        public bool ShowVersion { get; private set; }
         public string? Error { get; private set; }
+        private string? ChineseError { get; set; }
 
         public static RunnerOptions Parse(string[] args)
         {
             var options = new RunnerOptions();
             for (var i = 0; i < args.Length; i++)
             {
-                string? Next() => ++i < args.Length ? args[i] : null;
+                string? Next()
+                {
+                    var option = args[i];
+                    if (i + 1 < args.Length && !args[i + 1].StartsWith("--", StringComparison.Ordinal))
+                        return args[++i];
+                    options.SetError($"{option} requires a value.", $"{option} 需要提供值。");
+                    return null;
+                }
                 switch (args[i])
                 {
                     case "--tests": options.RunTests = true; options.RunBenchmarks = false; break;
                     case "--benchmarks": options.RunTests = false; options.RunBenchmarks = true; break;
                     case "--all": options.RunTests = true; options.RunBenchmarks = true; break;
                     case "--list": options.ListOnly = true; break;
+                    case "--help":
+                    case "-h": options.ShowHelp = true; break;
+                    case "--version": options.ShowVersion = true; break;
                     case "--filter": options.Filter = Next(); break;
                     case "--category": options.Category = Next(); break;
                     case "--baseline": options.BaselinePath = Next(); break;
                     case "--max-regression":
                         if (!double.TryParse(Next(), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var threshold))
-                            options.Error = "--max-regression requires a decimal fraction such as 0.05.";
+                            options.SetError("--max-regression requires a decimal fraction such as 0.05.", "--max-regression 需要小数比例，例如 0.05。");
                         else options.MaxRegression = threshold;
                         break;
                     case "--allow-environment-mismatch": options.AllowEnvironmentMismatch = true; break;
@@ -430,7 +429,7 @@ public static class XFERunner
                     case "--parallel": options.Parallel = true; break;
                     case "--no-parallel": options.Parallel = false; break;
                     case "--max-parallel":
-                        if (!int.TryParse(Next(), out var parallelism) || parallelism < 1) options.Error = "--max-parallel requires a positive integer.";
+                        if (!int.TryParse(Next(), out var parallelism) || parallelism < 1) options.SetError("--max-parallel requires a positive integer.", "--max-parallel 需要正整数。");
                         else options.MaxParallelism = parallelism;
                         break;
                     case "--fail-fast": options.FailFast = true; break;
@@ -438,23 +437,41 @@ public static class XFERunner
                     case "--quick": options.Quick = true; break;
                     case "--allow-unsafe-benchmark": options.AllowUnsafeBenchmark = true; break;
                     case "--seed":
-                        if (!int.TryParse(Next(), out var seed)) options.Error = "--seed requires an integer.";
+                        if (!int.TryParse(Next(), out var seed)) options.SetError("--seed requires an integer.", "--seed 需要整数。");
                         else options.Seed = seed;
                         break;
                     case "--report": options.ReportFormats = Next(); break;
+                    case "--language":
+                    case "--lang":
+                        var languageValue = Next();
+                        if (!ConsoleLocalizer.TryParseLanguage(languageValue, out var language))
+                            options.SetError("--language requires auto, en, or zh.", "--language 需要 auto、en 或 zh。");
+                        else options.Language = language;
+                        break;
                     case "--xfe-worker-test": options.WorkerTestId = Next(); options.RunTests = false; break;
                     case "--xfe-worker-benchmark": options.WorkerBenchmarkId = Next(); options.RunTests = false; break;
                     case "--xfe-result": options.ResultPath = Next(); break;
                     case "--xfe-settings": options.SettingsPath = Next(); break;
-                    default: options.Error = $"Unknown argument: {args[i]}"; break;
+                    default: options.SetError($"Unknown argument: {args[i]}", $"未知参数：{args[i]}"); break;
                 }
             }
             return options;
         }
 
+        public string GetError(ConsoleLanguage language) => new ConsoleLocalizer(language).IsChinese
+            ? ChineseError ?? Error ?? string.Empty
+            : Error ?? string.Empty;
+
+        private void SetError(string english, string chinese)
+        {
+            Error = english;
+            ChineseError = chinese;
+        }
+
         public void Apply(XfeRunSettings settings)
         {
             if (ArtifactsPath is not null) settings.Reports.ArtifactsPath = ArtifactsPath;
+            if (Language.HasValue) settings.Language = Language.Value;
             if (Parallel.HasValue) settings.Tests.Parallel = Parallel.Value;
             if (MaxParallelism.HasValue) settings.Tests.MaxParallelism = MaxParallelism.Value;
             if (FailFast) settings.Tests.FailFast = true;
@@ -482,6 +499,4 @@ public static class XFERunner
             }
         }
     }
-
-    private sealed class XfeConfigurationException(string message) : Exception(message);
 }

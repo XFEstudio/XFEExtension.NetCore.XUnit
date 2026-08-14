@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Text.Json;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
@@ -130,7 +131,17 @@ internal class Program
     }
 
     [Test]
-    public void ThrowsAssertionExceptions() => Assert.Throws<XfeAssertionException>(() => Assert.Equal(1, 2));
+    public void ThrowsAssertionExceptions() => Assert.Throws<XFEAssertionException>(() => Assert.Equal(1, 2));
+
+    [Test]
+    public void SerializesConsoleLanguageAsText()
+    {
+        var json = JsonSerializer.Serialize(new XfeRunSettings { Language = ConsoleLanguage.Chinese }, new JsonSerializerOptions(JsonSerializerDefaults.Web));
+        var restored = JsonSerializer.Deserialize<XfeRunSettings>(json, new JsonSerializerOptions(JsonSerializerDefaults.Web));
+
+        Assert.Contains("\"language\":\"Chinese\"", json);
+        Assert.Equal(ConsoleLanguage.Chinese, restored!.Language);
+    }
 
     [Test]
     public void UsesConfiguredActivator() => Assert.True(TrackingActivator.ActivationCount > 0);
@@ -466,45 +477,3 @@ internal sealed class BenchmarkSamples
         return Count;
     }
 }
-
-internal sealed class ScriptedBenchmarkClock(IReadOnlyList<long> elapsedTicks) : IBenchmarkClock
-{
-    private int _timestampCall;
-    private long _timestamp;
-
-    public long Frequency => 10_000_000;
-
-    public long GetTimestamp()
-    {
-        if ((_timestampCall++ & 1) == 0)
-            return _timestamp;
-        var durationIndex = _timestampCall / 2 - 1;
-        if (durationIndex >= elapsedTicks.Count)
-            throw new InvalidOperationException("The benchmark requested more clock samples than the test supplied.");
-        _timestamp += elapsedTicks[durationIndex];
-        return _timestamp;
-    }
-
-    public double GetElapsedNanoseconds(long startTimestamp, long endTimestamp) =>
-        (endTimestamp - startTimestamp) * (1_000_000_000d / Frequency);
-}
-
-#pragma warning disable CS0618, XFE0100
-[CTest]
-internal sealed class LegacyCompatibilityTests
-{
-    private bool _setUp;
-
-    [SetUp]
-    public void SetUp() => _setUp = true;
-
-    [MTest]
-    public void RunsLegacyTest() => Assert.True(_setUp);
-
-    [MRTest(1, 2, 3)]
-    public int ComparesLegacyReturnValue(int left, int right) => left + right;
-
-    [SMTest]
-    public int RunsLegacyBenchmark() => 40 + 2;
-}
-#pragma warning restore CS0618, XFE0100

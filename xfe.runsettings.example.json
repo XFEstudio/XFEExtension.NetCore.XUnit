@@ -1,4 +1,5 @@
 {
+  "language": "Auto",
   "tests": {
     "parallel": true,
     "maxParallelism": 8,
