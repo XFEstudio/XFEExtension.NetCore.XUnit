@@ -15,11 +15,11 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/XFEstudio/XFEExtension.NetCore.XUnit</RepositoryUrl>
     <PackageTags>XFE;Test;Benchmark;Runner;Unit</PackageTags>
-    <Version>4.0.0</Version>
+    <Version>4.0.1</Version>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
 	  <PackageReleaseNotes>
-      4.0 重建独立测试运行时、增量生成器与自适应基准引擎。
+      4.0.1 恢复 SMTest 的默认单次执行、完整控制台输出和兼容界面；现代 Benchmark 行为保持不变。
     </PackageReleaseNotes>
   </PropertyGroup>
 

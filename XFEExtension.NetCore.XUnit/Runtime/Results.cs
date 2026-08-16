@@ -52,7 +52,23 @@ public sealed record TestCaseResult(
     int Attempts,
     string? Message = null,
     string? StackTrace = null,
-    string? Output = null);
+    string? Output = null)
+{
+    /// <summary>
+    /// 获取该结果是否来自 3.x 的 SMTest 单次执行兼容路径。
+    /// </summary>
+    public bool IsLegacySingleRun { get; init; }
+
+    /// <summary>
+    /// 获取生成该结果的测试类完全限定名称。
+    /// </summary>
+    public string? TypeName { get; init; }
+
+    /// <summary>
+    /// 获取生成该结果的测试方法名称。
+    /// </summary>
+    public string? MethodName { get; init; }
+}
 
 /// <summary>
 /// 汇总一次普通测试运行的时间、全部用例结果和状态计数。

@@ -1,4 +1,6 @@
 using System.Collections.Immutable;
+using System.Diagnostics;
+using System.Reflection;
 using System.Text.Json;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
@@ -147,6 +149,16 @@ internal class Program
     public void UsesConfiguredActivator() => Assert.True(TrackingActivator.ActivationCount > 0);
 
     [Test]
+    public void RegistersSmTestAsDefaultSingleRunTest()
+    {
+        var registry = XfeGeneratedRegistry.Create();
+        var descriptor = Assert.Single(registry.Tests.Where(static test => test.MethodName == nameof(LegacyCompatibilityTests.RunsLegacyBenchmark)));
+
+        Assert.True(descriptor.IsLegacySingleRun);
+        Assert.False(registry.Benchmarks.Any(static benchmark => benchmark.MethodName == nameof(LegacyCompatibilityTests.RunsLegacyBenchmark)));
+    }
+
+    [Test]
     [Skip("Verifies skip reporting.")]
     public void SkippedTest() => throw new InvalidOperationException("A skipped test must not run.");
 
@@ -171,6 +183,23 @@ internal sealed class IsolatedTests
 internal sealed class WorkerProcessTests
 {
     [Test]
+    public async Task RunsSmTestWithoutModeArgumentsAndShowsAllConsoleOutput()
+    {
+        using var process = StartCurrentProcess("--filter", nameof(LegacyCompatibilityTests.RunsLegacyBenchmark), "--report", "none", "--language", "en");
+        var standardOutput = process.StandardOutput.ReadToEndAsync();
+        var errorOutput = process.StandardError.ReadToEndAsync();
+
+        await process.WaitForExitAsync();
+        var output = await standardOutput + await errorOutput;
+
+        Assert.Equal(0, process.ExitCode);
+        Assert.Equal(1, CountOccurrences(output, "SMTest standard output"));
+        Assert.Equal(1, CountOccurrences(output, "SMTest error output"));
+        Assert.Contains("SMTest single-run output", output);
+        Assert.False(output.Contains("Benchmark results", StringComparison.Ordinal));
+    }
+
+    [Test]
     public async Task TerminatesHardTimeoutWorker()
     {
         var exitCode = await XFERunner.RunAsync(["--tests", "--explicit", "--filter", nameof(HardTimeoutProbe), "--report", "none"]);
@@ -193,6 +222,35 @@ internal sealed class WorkerProcessTests
     [Explicit("Selected by ReportsCrashedWorker to validate crash reporting.")]
     [Isolated]
     public void WorkerCrashProbe() => Environment.FailFast("Intentional worker crash probe.");
+
+    private static Process StartCurrentProcess(params string[] arguments)
+    {
+        var processPath = Environment.ProcessPath ?? throw new InvalidOperationException("Cannot determine the current executable path.");
+        var startInfo = new ProcessStartInfo(processPath)
+        {
+            UseShellExecute = false,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            WorkingDirectory = Environment.CurrentDirectory
+        };
+        if (string.Equals(Path.GetFileNameWithoutExtension(processPath), "dotnet", StringComparison.OrdinalIgnoreCase))
+            startInfo.ArgumentList.Add(Assembly.GetEntryAssembly()?.Location ?? throw new InvalidOperationException("Cannot determine the entry assembly."));
+        foreach (var argument in arguments)
+            startInfo.ArgumentList.Add(argument);
+        return Process.Start(startInfo) ?? throw new InvalidOperationException("Failed to start the current test process.");
+    }
+
+    private static int CountOccurrences(string value, string search)
+    {
+        var count = 0;
+        var startIndex = 0;
+        while ((startIndex = value.IndexOf(search, startIndex, StringComparison.Ordinal)) >= 0)
+        {
+            count++;
+            startIndex += search.Length;
+        }
+        return count;
+    }
 }
 
 [TestFixture]

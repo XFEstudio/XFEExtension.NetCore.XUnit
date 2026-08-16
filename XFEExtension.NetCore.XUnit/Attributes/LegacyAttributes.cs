@@ -138,14 +138,14 @@ public sealed class MNRTestAttribute : MRTestAttribute
 }
 
 /// <summary>
-/// 兼容 3.x 的单方法计时特性；4.x 将其作为基准执行。
+/// 兼容 3.x 的单方法计时特性；4.x 在默认测试模式中单次执行并展示其全部控制台输出。
 /// </summary>
-[Obsolete("Use BenchmarkAttribute. Legacy attributes will be removed in XUnit 5.0.")]
+[Obsolete("Use TestAttribute or TestCaseAttribute. Legacy attributes will be removed in XUnit 5.0.")]
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
 public class SMTestAttribute : XFETestAttributeBase
 {
     /// <summary>
-    /// 初始化旧基准特性。
+    /// 初始化旧单次执行测试特性。
     /// </summary>
     /// <param name="values">传递给基准方法的参数。</param>
     public SMTestAttribute(params object?[] values) => Params = values;
@@ -154,7 +154,7 @@ public class SMTestAttribute : XFETestAttributeBase
 /// <summary>
 /// 兼容 3.x 的具名单方法计时特性。
 /// </summary>
-[Obsolete("Use BenchmarkAttribute.Name. Legacy attributes will be removed in XUnit 5.0.")]
+[Obsolete("Use TestAttribute or TestCaseAttribute. Legacy attributes will be removed in XUnit 5.0.")]
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
 public sealed class SMNTestAttribute : SMTestAttribute
 {
@@ -164,7 +164,7 @@ public sealed class SMNTestAttribute : SMTestAttribute
     public string TimerName { get; set; } = string.Empty;
 
     /// <summary>
-    /// 使用计时器名称和调用参数初始化旧基准。
+    /// 使用计时器名称和调用参数初始化旧单次执行测试。
     /// </summary>
     /// <param name="timerName">计时器显示名称。</param>
     /// <param name="values">传递给基准方法的参数。</param>
@@ -174,7 +174,7 @@ public sealed class SMNTestAttribute : SMTestAttribute
 /// <summary>
 /// 兼容 3.x 的带返回值单方法计时特性。
 /// </summary>
-[Obsolete("Use BenchmarkAttribute and consume the return value. Legacy attributes will be removed in XUnit 5.0.")]
+[Obsolete("Use TestCaseAttribute and Assert.Equal. Legacy attributes will be removed in XUnit 5.0.")]
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
 public class SMRTestAttribute : SMTestAttribute
 {
@@ -184,7 +184,7 @@ public class SMRTestAttribute : SMTestAttribute
     public object? ReturnValue { get; set; }
 
     /// <summary>
-    /// 使用方法参数和位于最后一项的期望返回值初始化旧基准。
+    /// 使用方法参数和位于最后一项的期望返回值初始化旧单次执行测试。
     /// </summary>
     /// <param name="valuesAndResult">方法参数，最后一项为期望返回值。</param>
     public SMRTestAttribute(params object?[] valuesAndResult)
@@ -201,7 +201,7 @@ public class SMRTestAttribute : SMTestAttribute
 /// <summary>
 /// 兼容 3.x 的具名带返回值单方法计时特性。
 /// </summary>
-[Obsolete("Use BenchmarkAttribute.Name and consume the return value. Legacy attributes will be removed in XUnit 5.0.")]
+[Obsolete("Use TestCaseAttribute and Assert.Equal. Legacy attributes will be removed in XUnit 5.0.")]
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
 public sealed class SMNRTestAttribute : SMRTestAttribute
 {
@@ -211,7 +211,7 @@ public sealed class SMNRTestAttribute : SMRTestAttribute
     public string? TimerName { get; set; }
 
     /// <summary>
-    /// 使用计时器名称、方法参数和期望返回值初始化旧基准。
+    /// 使用计时器名称、方法参数和期望返回值初始化旧单次执行测试。
     /// </summary>
     /// <param name="timerName">计时器显示名称。</param>
     /// <param name="valuesAndResult">方法参数，最后一项为期望返回值。</param>

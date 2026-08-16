@@ -176,7 +176,12 @@ public static partial class XFERunner
             if (test.SkipReason is not null || test.Explicit && !settings.Tests.IncludeExplicit)
             {
                 results.Add(new TestCaseResult(test.Id, test.DisplayName, TestOutcome.Skipped, TimeSpan.Zero, TimeSpan.Zero, 0,
-                    test.SkipReason ?? "Explicit test was not selected."));
+                    test.SkipReason ?? "Explicit test was not selected.")
+                {
+                    IsLegacySingleRun = test.IsLegacySingleRun,
+                    TypeName = test.TypeName,
+                    MethodName = test.MethodName
+                });
                 continue;
             }
             results.Add(await WorkerProcess.RunTestAsync(test, settings.Tests, cancellationToken).ConfigureAwait(false));

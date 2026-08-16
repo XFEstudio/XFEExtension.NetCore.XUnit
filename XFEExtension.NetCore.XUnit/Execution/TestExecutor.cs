@@ -74,8 +74,8 @@ internal sealed class TestExecutor
                 }
                 if (test.SkipReason is not null || test.Explicit && !settings.IncludeExplicit)
                 {
-                    results.Add(new TestCaseResult(test.Id, test.DisplayName, TestOutcome.Skipped, TimeSpan.Zero, TimeSpan.Zero, 0,
-                        test.SkipReason ?? "Explicit test was not selected."));
+                    results.Add(WithDescriptor(test, new TestCaseResult(test.Id, test.DisplayName, TestOutcome.Skipped, TimeSpan.Zero, TimeSpan.Zero, 0,
+                        test.SkipReason ?? "Explicit test was not selected.")));
                     continue;
                 }
 
@@ -145,7 +145,7 @@ internal sealed class TestExecutor
                 }
                 totalWatch.Stop();
                 output = getOutput();
-                lastResult = new TestCaseResult(test.Id, test.DisplayName, TestOutcome.Passed, bodyDuration, totalWatch.Elapsed, attempt, Output: output);
+                lastResult = WithDescriptor(test, new TestCaseResult(test.Id, test.DisplayName, TestOutcome.Passed, bodyDuration, totalWatch.Elapsed, attempt, Output: output));
                 return lastResult;
             }
             catch (Exception exception)
@@ -176,8 +176,15 @@ internal sealed class TestExecutor
     private static TestCaseResult FailedFromException(TestDescriptor test, Exception exception, TestOutcome outcome, int attempts, TimeSpan body, TimeSpan total, string? output)
     {
         var actual = exception is AggregateException aggregateException ? aggregateException.Flatten() : exception;
-        return new TestCaseResult(test.Id, test.DisplayName, outcome, body, total, attempts, actual.Message, actual.StackTrace, output);
+        return WithDescriptor(test, new TestCaseResult(test.Id, test.DisplayName, outcome, body, total, attempts, actual.Message, actual.StackTrace, output));
     }
+
+    private static TestCaseResult WithDescriptor(TestDescriptor test, TestCaseResult result) => result with
+    {
+        IsLegacySingleRun = test.IsLegacySingleRun,
+        TypeName = test.TypeName,
+        MethodName = test.MethodName
+    };
 
     private static ValueTask DisposeInstanceAsync(object? instance) => XfeObjectFactory.DisposeAsync(instance);
 }

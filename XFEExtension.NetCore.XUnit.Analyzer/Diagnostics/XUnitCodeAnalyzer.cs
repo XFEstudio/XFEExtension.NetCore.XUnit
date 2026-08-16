@@ -102,7 +102,7 @@ public sealed class XUnitCodeAnalyzer : DiagnosticAnalyzer
         {
             "CTestAttribute" or "CNTestAttribute" => "TestFixtureAttribute",
             "MTestAttribute" or "MNTestAttribute" or "MRTestAttribute" or "MNRTestAttribute" => "TestCaseAttribute",
-            "SMTestAttribute" or "SMNTestAttribute" or "SMRTestAttribute" or "SMNRTestAttribute" => "BenchmarkAttribute",
+            "SMTestAttribute" or "SMNTestAttribute" or "SMRTestAttribute" or "SMNRTestAttribute" => "TestCaseAttribute",
             "SetUpAttribute" => "BeforeEachAttribute",
             _ => null
         };
