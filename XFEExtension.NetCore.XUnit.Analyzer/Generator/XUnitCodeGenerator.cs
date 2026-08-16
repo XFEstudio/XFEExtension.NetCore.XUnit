@@ -191,6 +191,7 @@ public sealed class XUnitCodeGenerator : IIncrementalGenerator
         var testCases = FindAttributes(method, "TestCaseAttribute").ToArray();
         var memberData = FindAttributes(method, "MemberDataAttribute").ToArray();
         var legacyCases = method.GetAttributes().Where(static attribute => Inherits(attribute.AttributeClass, "MTestAttribute")).ToArray();
+        var legacySingleRunCases = method.GetAttributes().Where(static attribute => Inherits(attribute.AttributeClass, "SMTestAttribute")).ToArray();
         var classCases = method.ContainingType.GetAttributes().Where(static attribute => Inherits(attribute.AttributeClass, "CTestAttribute")).ToArray();
         var index = 0;
 
@@ -226,10 +227,18 @@ public sealed class XUnitCodeGenerator : IIncrementalGenerator
                 AppendTest(output, method, wrapper, lifecycle, ArrayExpression(arguments), index++, name, true, hasExpected, expected, factory);
             }
         }
+
+        foreach (var attribute in legacySingleRunCases)
+        {
+            var arguments = GetLegacyArguments(attribute, true, out var expected, out var hasExpected, out var name);
+            var factory = "static () => global::XFEExtension.NetCore.XUnit.Runtime.XfeObjectFactory.Create(typeof(" + TypeName(method.ContainingType) + "), [])";
+            AppendTest(output, method, wrapper, lifecycle, ArrayExpression(arguments), index++, name, true, hasExpected, expected, factory, legacySingleRun: true);
+        }
     }
 
     private static void AppendTest(StringBuilder output, IMethodSymbol method, string wrapper, string lifecycle, string arguments, int index,
-        string? name, bool legacy, bool hasExpected, string expected, string factory, string? customId = null, string? customDisplay = null, int indent = 8)
+        string? name, bool legacy, bool hasExpected, string expected, string factory, string? customId = null, string? customDisplay = null, int indent = 8,
+        bool legacySingleRun = false)
     {
         var spaces = new string(' ', indent);
         var id = customId ?? Escape(Id(method, index));
@@ -251,6 +260,7 @@ public sealed class XUnitCodeGenerator : IIncrementalGenerator
         output.Append(spaces).Append("    TimeoutMilliseconds = ").Append(GetInt(method, "TimeoutAttribute")).AppendLine(",");
         output.Append(spaces).Append("    RetryCount = ").Append(GetInt(method, "RetryAttribute")).AppendLine(",");
         output.Append(spaces).Append("    IsLegacy = ").Append(legacy ? "true" : "false").AppendLine(",");
+        output.Append(spaces).Append("    IsLegacySingleRun = ").Append(legacySingleRun ? "true" : "false").AppendLine(",");
         output.Append(spaces).Append("    HasExpectedResult = ").Append(hasExpected ? "true" : "false").AppendLine(",");
         output.Append(spaces).Append("    ExpectedResult = ").Append(expected).AppendLine(",");
         output.Append(spaces).Append("    Factory = ").Append(factory).AppendLine(",");
@@ -262,20 +272,15 @@ public sealed class XUnitCodeGenerator : IIncrementalGenerator
     private static void BuildBenchmarkRegistrations(StringBuilder output, IMethodSymbol method, string wrapper, string overheadWrapper, string lifecycle)
     {
         var benchmark = FindAttribute(method, "BenchmarkAttribute");
-        var legacy = method.GetAttributes().Where(static attribute => Inherits(attribute.AttributeClass, "SMTestAttribute")).ToArray();
-        if (benchmark is null && legacy.Length == 0)
+        if (benchmark is null)
             return;
-        var argumentSets = benchmark is null
-            ? legacy.Select(attribute => GetLegacyArguments(attribute, true, out _, out _, out _)).ToArray()
-            : FindAttributes(method, "ArgumentsAttribute").Select(attribute => GetArrayArgument(attribute, 0)).DefaultIfEmpty(ImmutableArray<TypedConstant>.Empty).ToArray();
+        var argumentSets = FindAttributes(method, "ArgumentsAttribute").Select(attribute => GetArrayArgument(attribute, 0)).DefaultIfEmpty(ImmutableArray<TypedConstant>.Empty).ToArray();
         var parameterSets = BuildParameterSets(method.ContainingType);
         var caseIndex = 0;
         foreach (var arguments in argumentSets)
         foreach (var parameters in parameterSets)
         {
-            var legacyAttribute = benchmark is null ? legacy[Math.Min(caseIndex, legacy.Length - 1)] : null;
-            var legacyName = legacyAttribute is null ? null : GetLegacyName(legacyAttribute);
-            var displayName = GetNamedString(benchmark, "Name") ?? legacyName ?? method.ContainingType.Name + "." + method.Name;
+            var displayName = GetNamedString(benchmark, "Name") ?? method.ContainingType.Name + "." + method.Name;
             if (parameters.Count > 0)
                 displayName += "(" + string.Join(", ", parameters.Select(static pair => pair.Key + "=" + pair.Value.DisplayValue)) + ")";
             output.AppendLine("        registry.AddBenchmark(new global::XFEExtension.NetCore.XUnit.Runtime.BenchmarkDescriptor");
@@ -288,7 +293,7 @@ public sealed class XUnitCodeGenerator : IIncrementalGenerator
             output.Append("            Categories = ").Append(StringArray(GetCategories(method))).AppendLine(",");
             output.Append("            Baseline = ").Append(GetNamedBool(benchmark, "Baseline") ? "true" : "false").AppendLine(",");
             output.Append("            Strategy = (global::XFEExtension.NetCore.XUnit.Attributes.BenchmarkStrategy)").Append(GetNamedInt(benchmark, "Strategy")).AppendLine(",");
-            output.Append("            IsLegacy = ").Append(benchmark is null ? "true" : "false").AppendLine(",");
+            output.AppendLine("            IsLegacy = false,");
             output.Append("            ParameterKey = ").Append(Escape(string.Join(";", parameters.Select(static pair => pair.Key + "=" + pair.Value.DisplayValue)))).AppendLine(",");
             output.Append("            Factory = static () => global::XFEExtension.NetCore.XUnit.Runtime.XfeObjectFactory.Create(typeof(").Append(TypeName(method.ContainingType)).AppendLine("), []),");
             output.Append("            Invoker = ").Append(wrapper).AppendLine(",");

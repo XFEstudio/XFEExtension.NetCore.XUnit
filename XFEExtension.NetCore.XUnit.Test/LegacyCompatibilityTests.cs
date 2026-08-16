@@ -19,6 +19,11 @@ internal sealed class LegacyCompatibilityTests
     public int ComparesLegacyReturnValue(int left, int right) => left + right;
 
     [SMTest]
-    public int RunsLegacyBenchmark() => 40 + 2;
+    public int RunsLegacyBenchmark()
+    {
+        Console.WriteLine("SMTest standard output");
+        Console.Error.WriteLine("SMTest error output");
+        return 40 + 2;
+    }
 }
 #pragma warning restore CS0618, XFE0100

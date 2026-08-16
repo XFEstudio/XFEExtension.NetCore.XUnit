@@ -27,7 +27,12 @@ internal static class WorkerProcess
                 await EnsureStoppedAsync(process).ConfigureAwait(false);
                 var timedOutOutput = await stdoutTask.ConfigureAwait(false) + await stderrTask.ConfigureAwait(false);
                 return new TestCaseResult(descriptor.Id, descriptor.DisplayName, TestOutcome.TimedOut, TimeSpan.Zero, elapsed, 1,
-                    $"Test exceeded the {timeout} ms timeout and its worker process was terminated.", Output: timedOutOutput);
+                    $"Test exceeded the {timeout} ms timeout and its worker process was terminated.", Output: timedOutOutput)
+                {
+                    IsLegacySingleRun = descriptor.IsLegacySingleRun,
+                    TypeName = descriptor.TypeName,
+                    MethodName = descriptor.MethodName
+                };
             }
 
             var stdout = await stdoutTask.ConfigureAwait(false);
@@ -39,7 +44,12 @@ internal static class WorkerProcess
                     return result with { Output = string.Concat(result.Output, stdout, stderr) };
             }
             return new TestCaseResult(descriptor.Id, descriptor.DisplayName, TestOutcome.Crashed, TimeSpan.Zero, elapsed, 1,
-                $"Worker exited with code {process.ExitCode} without producing a result.", Output: stdout + stderr);
+                $"Worker exited with code {process.ExitCode} without producing a result.", Output: stdout + stderr)
+            {
+                IsLegacySingleRun = descriptor.IsLegacySingleRun,
+                TypeName = descriptor.TypeName,
+                MethodName = descriptor.MethodName
+            };
         }
         finally
         {

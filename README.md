@@ -89,4 +89,4 @@ The analyzer rejects `async void` and invalid lifecycle signatures. Migration di
 
 ## Migrating from 3.x
 
-`CTest`, `MTest`, `MRTest`, `SMTest`, `SetUp`, and `XFECode` remain source-compatible for the 4.x line and are marked obsolete. Migrate to `TestFixture`, `Test`, `TestCase`, `Benchmark`, `BeforeEach`, and `Assert`. Legacy timing attributes are treated as benchmarks and therefore run only with `--benchmarks`. The compatibility surface will be removed in 5.0.
+`CTest`, `MTest`, `MRTest`, `SMTest`, `SetUp`, and `XFECode` remain source-compatible for the 4.x line and are marked obsolete. Migrate to `TestFixture`, `Test`, `TestCase`, `Benchmark`, `BeforeEach`, and `Assert`. `SMTest`, `SMNTest`, `SMRTest`, and `SMNRTest` keep their original single-run behavior: they run in the default test mode without command-line options, await asynchronous results, compare legacy expected return values, and show all captured console output in a dedicated compatibility panel. Modern `Benchmark` methods remain opt-in through `--benchmarks`. The compatibility surface will be removed in 5.0.

@@ -123,6 +123,11 @@ public sealed class TestDescriptor
     public bool IsLegacy { get; init; }
 
     /// <summary>
+    /// 获取该用例是否来自 3.x 的 <see cref="Attributes.SMTestAttribute"/> 单次执行特性。
+    /// </summary>
+    public bool IsLegacySingleRun { get; init; }
+
+    /// <summary>
     /// 获取测试集合名称；为空时按声明类型分组。
     /// </summary>
     public string? Collection { get; init; }
