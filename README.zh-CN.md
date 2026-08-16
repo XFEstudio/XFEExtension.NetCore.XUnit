@@ -87,4 +87,4 @@ dotnet run -c Release -- --benchmarks --baseline previous/benchmark-results.json
 
 ## 从 3.x 迁移
 
-`CTest`、`MTest`、`MRTest`、`SMTest`、`SetUp` 和 `XFECode` 在整个 4.x 中继续保留并标记为过时。请迁移到 `TestFixture`、`Test`、`TestCase`、`Benchmark`、`BeforeEach` 和 `Assert`。旧计时特性会作为基准处理，因此只在使用 `--benchmarks` 时执行；兼容 API 将在 5.0 删除。
+`CTest`、`MTest`、`MRTest`、`SMTest`、`SetUp` 和 `XFECode` 在整个 4.x 中继续保留并标记为过时。请迁移到 `TestFixture`、`Test`、`TestCase`、`Benchmark`、`BeforeEach` 和 `Assert`。`SMTest`、`SMNTest`、`SMRTest` 和 `SMNRTest` 保留原有的单次执行语义：无需命令行参数即可在默认测试模式运行，完整等待异步返回、比较旧式期望返回值，并在专属兼容面板中展示捕获到的全部控制台输出。现代 `Benchmark` 仍需通过 `--benchmarks` 显式运行；兼容 API 将在 5.0 删除。

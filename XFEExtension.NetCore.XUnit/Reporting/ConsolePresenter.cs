@@ -75,6 +75,15 @@ internal sealed class ConsolePresenter(ConsoleLocalizer text)
 
     public void PrintTests(TestRunSummary summary)
     {
+        var legacySingleRuns = summary.Results.Where(static result => result.IsLegacySingleRun).ToArray();
+        if (legacySingleRuns.Length > 0)
+        {
+            WriteSection(text.Select("SMTest single-run output", "SMTest 单次执行输出"), text.Select($"{legacySingleRuns.Length} methods", $"{legacySingleRuns.Length} 个方法"));
+            for (var index = 0; index < legacySingleRuns.Length; index++)
+                PrintLegacySingleRun(legacySingleRuns[index], index + 1);
+            Console.WriteLine();
+        }
+
         WriteSection(text.Select("Test results", "测试结果"), text.Select($"{summary.Total} {(summary.Total == 1 ? "test" : "tests")}", $"{summary.Total} 个测试"));
         if (summary.Results.Count == 0)
         {
@@ -110,7 +119,7 @@ internal sealed class ConsolePresenter(ConsoleLocalizer text)
             }
             if (result.Attempts > 1)
                 WriteDetail(text.Select("Attempts", "尝试次数"), result.Attempts.ToString(), ConsoleColor.DarkYellow);
-            if (result.Outcome != TestOutcome.Passed && !string.IsNullOrWhiteSpace(result.Output))
+            if (result.Outcome != TestOutcome.Passed && !result.IsLegacySingleRun && !string.IsNullOrWhiteSpace(result.Output))
                 WriteBlock(text.Select("Captured output", "捕获的输出"), result.Output, ConsoleColor.DarkGray);
             if (result.Outcome is TestOutcome.Failed or TestOutcome.TimedOut or TestOutcome.Crashed && !string.IsNullOrWhiteSpace(result.StackTrace))
                 WriteBlock(text.Select("Stack trace", "堆栈跟踪"), result.StackTrace, ConsoleColor.DarkGray);
@@ -119,6 +128,59 @@ internal sealed class ConsolePresenter(ConsoleLocalizer text)
         Console.WriteLine();
         PrintTestSummary(summary);
         PrintSlowestTests(summary);
+    }
+
+    private void PrintLegacySingleRun(TestCaseResult result, int executionIndex)
+    {
+        var width = SafeConsoleWidth();
+        var typeName = result.TypeName?.Split('.').LastOrDefault() ?? text.Select("Unknown type", "未知类型");
+        var methodName = result.MethodName ?? result.DisplayName;
+        var defaultName = $"{typeName}.{methodName}";
+        var usesCustomName = !result.DisplayName.StartsWith(defaultName, StringComparison.Ordinal);
+        var title = usesCustomName
+            ? text.Select($"Name: {result.DisplayName}", $"标识名：{result.DisplayName}")
+            : text.Select($"Method: {methodName}", $"方法名：{methodName}");
+        title = TruncateDisplay(title, Math.Max(10, width - 8));
+        var titlePrefix = $"╭─ {title} ";
+        WriteColored(titlePrefix, ConsoleColor.DarkYellow);
+        WriteColoredLine(new string('─', Math.Max(1, width - DisplayWidth(titlePrefix) - 1)) + "╮", ConsoleColor.DarkYellow);
+
+        WriteColored("│ ", ConsoleColor.DarkYellow);
+        WriteBadge(text.Select("START", "开始执行"), 12, ConsoleColor.Cyan);
+        WriteColored($"  {text.Select("Method", "方法")}  ", ConsoleColor.DarkGray);
+        WriteColored(methodName, ConsoleColor.Yellow);
+        WriteColored($"  {text.Select("Class", "类")}  ", ConsoleColor.DarkGray);
+        WriteColoredLine(typeName, ConsoleColor.Green);
+        WriteColoredLine("│", ConsoleColor.DarkYellow);
+
+        if (!string.IsNullOrEmpty(result.Output))
+        {
+            Console.Write(result.Output);
+            if (!result.Output.EndsWith('\n'))
+                Console.WriteLine();
+        }
+
+        WriteColoredLine("│", ConsoleColor.DarkYellow);
+        WriteColored("│ ", ConsoleColor.DarkYellow);
+        WriteBadge(text.Select("FINISHED", "执行完成"), 12, ConsoleColor.Cyan);
+        WriteColored($"  {text.Select("Run", "执行批次")}  ", ConsoleColor.DarkGray);
+        WriteColored(executionIndex.ToString(), ConsoleColor.Gray);
+        WriteColored($"  {text.Select("Duration", "执行时间")}  ", ConsoleColor.DarkGray);
+        WriteColoredLine(FormatDuration(result.BodyDuration), ConsoleColor.Cyan);
+
+        WriteColored("│ ", ConsoleColor.DarkYellow);
+        var passed = result.Outcome == TestOutcome.Passed;
+        WriteBadge(passed ? text.Select("PASSED", "测试通过") : text.Select("FAILED", "测试失败"), 12, passed ? ConsoleColor.Green : ConsoleColor.Red);
+        if (!passed && !string.IsNullOrWhiteSpace(result.Message))
+        {
+            WriteColored($"  {text.Select("Reason", "失败原因")}  ", ConsoleColor.Red);
+            WriteColoredLine(text.Message(result.Message), ConsoleColor.Gray);
+        }
+        else
+        {
+            Console.WriteLine();
+        }
+        WriteColoredLine("╰" + new string('─', Math.Max(1, width - 2)) + "╯", ConsoleColor.DarkYellow);
     }
 
     public void PrintBenchmarks(BenchmarkRunSummary summary)
