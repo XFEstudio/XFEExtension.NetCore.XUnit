@@ -15,7 +15,7 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/XFEstudio/XFEExtension.NetCore.XUnit</RepositoryUrl>
     <PackageTags>XFE;Test;Benchmark;Runner;Unit</PackageTags>
-    <Version>4.0.1</Version>
+    <Version>4.0.2</Version>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
 	  <PackageReleaseNotes>

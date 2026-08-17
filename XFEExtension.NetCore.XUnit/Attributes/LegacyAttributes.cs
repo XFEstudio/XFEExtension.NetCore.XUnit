@@ -3,7 +3,6 @@ namespace XFEExtension.NetCore.XUnit.Attributes;
 /// <summary>
 /// 为 3.x 兼容特性保存构造参数的旧基类；新代码应使用 4.x 测试和基准特性。
 /// </summary>
-[Obsolete("Legacy attribute base. Use the XUnit 4.0 attributes; this type will be removed in XUnit 5.0.")]
 public class XFETestAttributeBase : Attribute
 {
     /// <summary>
@@ -140,7 +139,6 @@ public sealed class MNRTestAttribute : MRTestAttribute
 /// <summary>
 /// 兼容 3.x 的单方法计时特性；4.x 在默认测试模式中单次执行并展示其全部控制台输出。
 /// </summary>
-[Obsolete("Use TestAttribute or TestCaseAttribute. Legacy attributes will be removed in XUnit 5.0.")]
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
 public class SMTestAttribute : XFETestAttributeBase
 {
