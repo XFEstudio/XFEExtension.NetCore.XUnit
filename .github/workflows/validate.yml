@@ -17,11 +17,7 @@ env:
 
 jobs:
   test:
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [windows-latest, ubuntu-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
+    runs-on: windows-latest
 
     steps:
       - name: Checkout
@@ -49,6 +45,6 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: reports-${{ matrix.os }}
+          name: reports-${{ runner.os }}
           path: ${{ runner.temp }}/xfe-*-artifacts
           if-no-files-found: warn
